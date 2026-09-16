@@ -4,8 +4,8 @@ use ratatui::text::Span;
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
 
-use vanta::theme::Theme;
 use vanta::extension::{Component, Extension, ExtensionMetadata, Page};
+use vanta::theme::Theme;
 
 pub struct CveFeedComponent;
 
@@ -17,9 +17,12 @@ impl Component for CveFeedComponent {
     fn render(&mut self, f: &mut Frame, area: Rect, theme: &Theme) {
         let block = Block::default()
             .borders(Borders::ALL)
-            .title(Span::styled(" CVE Security Feed ", Style::default().fg(theme.red)))
+            .title(Span::styled(
+                " CVE Security Feed ",
+                Style::default().fg(theme.red),
+            ))
             .border_style(Style::default().fg(theme.dim));
-        
+
         let content = Paragraph::new("Live CVE Feed...").block(block);
         f.render_widget(content, area);
     }
