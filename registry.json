@@ -1,0 +1,15 @@
+{
+  "api_version": "0.9.1",
+  "extensions": [
+    {
+      "id": "security",
+      "name": "Vanta Security",
+      "description": "Live CVE security feeds and threat monitoring.",
+      "version": "0.1.0",
+      "api_version": "0.9.0",
+      "author": "Community",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/security.wasm",
+      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92"
+    }
+  ]
+}
