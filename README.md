@@ -1,6 +1,6 @@
 # Vanta Community Integrations 🧩
 
-This repository contains official and community-contributed extensions, widgets, and pages for [Vanta](https://github.com/ziuus/vanta).
+This repository contains community-contributed extensions, widgets, and pages for [Vanta](https://github.com/ziuus/vanta).
 
 ---
 
@@ -16,7 +16,7 @@ Always inspect third-party extension source code before adding it to your Vanta 
 
 | Extension | Crate Name | Description |
 | :--- | :--- | :--- |
-| **Security Pack** | `vanta-security` | Live CVE security feeds and threat monitoring components. |
+| **Security Pack** | `vanta-security` | UI placeholder/reference demonstrating how to build an extension. *Note: Not a functioning live threat-monitoring integration yet.* |
 
 ---
 
