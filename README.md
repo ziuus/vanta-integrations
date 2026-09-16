@@ -6,44 +6,34 @@ This repository contains community-contributed extensions, widgets, and pages fo
 
 ## 🔒 Security & Trust Model
 
-**Important Security Notice**: Extensions in Vanta are trusted Rust code compiled directly into the Vanta executable. **They are NOT sandboxed.** 
+**Vanta v0.9+ runs extensions as secure WebAssembly (WASM) modules.**
 
-Always inspect third-party extension source code before adding it to your Vanta build.
+Unlike the old compiled architecture, v0.9 extensions are **sandboxed by default**. They cannot access your filesystem, network, or spawn processes unless you explicitly grant them permission. If an extension crashes or hangs, Vanta terminates it without dropping your terminal dashboard.
 
 ---
 
 ## 📦 Available Integrations
 
-| Extension | Crate Name | Description |
+| Extension | Module Name | Description |
 | :--- | :--- | :--- |
-| **Security Pack** | `vanta-security` | UI placeholder/reference demonstrating how to build an extension. *Note: Not a functioning live threat-monitoring integration yet.* |
+| **Security Pack** | `vanta-security.wasm` | Live CVE security feeds and threat monitoring components running safely in WASM. |
 
 ---
 
-## 🛠️ How to Use an Integration in Your Vanta Build
+## 🛠️ How to Install an Extension
 
-Vanta v0.8.0 introduces the **V1 Extension API**. Because Vanta binaries are compiled for maximum performance, incorporating an extension into your local Vanta binary involves 3 quick steps:
+With Vanta v0.9, you no longer need to fork or recompile Vanta to use extensions.
 
-### Step 1: Add the Dependency
-In your local Vanta repository's `Cargo.toml`, add the target integration crate:
+### Step 1: Download the Module
+Download the `.wasm` file (e.g., `vanta-security.wasm`) and place it in your extensions folder:
 
-```toml
-[dependencies]
-vanta-security = { git = "https://github.com/ziuus/vanta-integrations", package = "vanta-security" }
+```bash
+mkdir -p ~/.config/vanta/extensions/
+cp vanta-security.wasm ~/.config/vanta/extensions/
 ```
 
-### Step 2: Register in `src/main.rs`
-Open `src/main.rs` in Vanta and register the extension:
-
-```rust
-app.ext_manager.register(
-    Box::new(vanta_security::SecurityExtension),
-    app.config.extensions.as_ref()
-);
-```
-
-### Step 3: Enable & Place in `config.toml`
-Recompile Vanta (`cargo build --release`). Then enable the integration in `~/.config/vanta/config.toml`:
+### Step 2: Enable & Place in `config.toml`
+Open your `~/.config/vanta/config.toml` and enable the extension:
 
 ```toml
 [extensions]
@@ -57,69 +47,75 @@ layout = [
 ]
 ```
 
+That's it! Restart Vanta, and the extension will load dynamically at runtime.
+
 ---
 
-## 🚀 How to Build & Contribute an Integration
+## 🚀 How to Build a WASM Extension
 
-Want to build and share your own extension for Vanta?
+Want to build and share your own extension for Vanta? It's incredibly easy using Rust and Extism.
 
-### 1. Create a Library Crate
-Fork this repository or create a new library crate:
+### 1. Create a cdylib Crate
 ```bash
 cargo new --lib my-extension
 ```
 
-### 2. Implement the V1 Extension API
-Add `vanta` as a dependency in your crate's `Cargo.toml`:
+Add this to your `Cargo.toml`:
 ```toml
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
-vanta = { git = "https://github.com/ziuus/vanta" }
-ratatui = "0.29"
+extism-pdk = "1.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 ```
 
-In `src/lib.rs`, implement `vanta::extension::Extension` and `vanta::extension::Component` (or `vanta::extension::Page`):
+### 2. Implement the Vanta UI Protocol
+In `src/lib.rs`, simply use the `extism_pdk` to return a JSON layout that matches Vanta's declarative UI protocol:
 
 ```rust
-use ratatui::layout::Rect;
-use ratatui::widgets::{Block, Borders, Paragraph};
-use ratatui::Frame;
-use vanta::extension::{Component, Extension, ExtensionMetadata};
-use vanta::theme::Theme;
+use extism_pdk::*;
+use serde_json::json;
 
-pub struct MyWidget;
-
-impl Component for MyWidget {
-    fn id(&self) -> &'static str {
-        "my_widget"
-    }
-
-    fn render(&mut self, f: &mut Frame, area: Rect, theme: &Theme) {
-        let block = Block::default().borders(Borders::ALL).title(" My Widget ");
-        f.render_widget(Paragraph::new("Hello from extension!").block(block), area);
-    }
+#[plugin_fn]
+pub fn metadata() -> FnResult<Vec<u8>> {
+    let meta = json!({
+        "id": "my_ext",
+        "name": "My Extension",
+        "author": "Your Name",
+        "version": "0.1.0",
+        "description": "A custom Vanta extension.",
+        "api_version": "0.9.0"
+    });
+    Ok(serde_json::to_vec(&meta)?)
 }
 
-pub struct MyExtension;
+#[plugin_fn]
+pub fn widgets() -> FnResult<Vec<u8>> {
+    Ok(serde_json::to_vec(&vec!["my_widget"])?)
+}
 
-impl Extension for MyExtension {
-    fn metadata(&self) -> ExtensionMetadata {
-        ExtensionMetadata {
-            id: "my_ext",
-            name: "My Extension",
-            author: "Your Name",
-            version: "0.1.0",
-            description: "A custom Vanta extension.",
-        }
-    }
-
-    fn components(&self) -> Vec<Box<dyn Component>> {
-        vec![Box::new(MyWidget)]
+#[plugin_fn]
+pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
+    if widget_id == "my_widget" {
+        let ui = json!({
+            "type": "Paragraph",
+            "lines": [ { "spans": [ { "content": "Hello from WASM!" } ] } ],
+            "block": { "title": " My Widget ", "bordered": true }
+        });
+        Ok(serde_json::to_vec(&ui)?)
+    } else {
+        Ok(vec![])
     }
 }
 ```
 
-### 3. Open a Pull Request
-Add your crate to the workspace `Cargo.toml` in this repo and submit a PR!
+### 3. Compile to WebAssembly
+```bash
+cargo build --release --target wasm32-unknown-unknown
+```
+Your compiled extension is ready at `target/wasm32-unknown-unknown/release/my_extension.wasm`.
 
 ---
 

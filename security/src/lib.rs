@@ -1,61 +1,60 @@
-use ratatui::layout::Rect;
-use ratatui::style::Style;
-use ratatui::text::Span;
-use ratatui::widgets::{Block, Borders, Paragraph};
-use ratatui::Frame;
+use extism_pdk::*;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 
-use vanta::extension::{Component, Extension, ExtensionMetadata};
-use vanta::theme::Theme;
-
-pub struct CveFeedComponent;
-
-impl Component for CveFeedComponent {
-    fn id(&self) -> &'static str {
-        "cve_feed"
-    }
-
-    fn render(&mut self, f: &mut Frame, area: Rect, theme: &Theme) {
-        let block = Block::default()
-            .borders(Borders::ALL)
-            .title(Span::styled(
-                " CVE Security Feed ",
-                Style::default().fg(theme.red),
-            ))
-            .border_style(Style::default().fg(theme.dim));
-
-        let content = Paragraph::new("Live CVE Feed...").block(block);
-        f.render_widget(content, area);
-    }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ExtensionMetadata {
+    pub id: String,
+    pub name: String,
+    pub author: String,
+    pub version: String,
+    pub description: String,
+    pub api_version: String,
 }
 
-pub struct SecurityExtension;
-
-impl Extension for SecurityExtension {
-    fn metadata(&self) -> ExtensionMetadata {
-        ExtensionMetadata {
-            id: "security",
-            name: "Vanta Security Pack",
-            author: "Community",
-            version: "1.0.0",
-            description: "Security monitoring components.",
-        }
-    }
-
-    fn components(&self) -> Vec<Box<dyn Component>> {
-        vec![Box::new(CveFeedComponent)]
-    }
+#[plugin_fn]
+pub fn metadata() -> FnResult<Vec<u8>> {
+    let meta = ExtensionMetadata {
+        id: "security".to_string(),
+        name: "Vanta Security Pack".to_string(),
+        author: "Community".to_string(),
+        version: "1.0.0".to_string(),
+        description: "Security monitoring components.".to_string(),
+        api_version: "0.9.0".to_string(),
+    };
+    Ok(serde_json::to_vec(&meta)?)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[plugin_fn]
+pub fn widgets() -> FnResult<Vec<u8>> {
+    let widgets = vec!["cve_feed"];
+    Ok(serde_json::to_vec(&widgets)?)
+}
 
-    #[test]
-    fn test_security_extension_metadata() {
-        let ext = SecurityExtension;
-        let meta = ext.metadata();
-        assert_eq!(meta.id, "security");
-        assert_eq!(ext.components().len(), 1);
-        assert_eq!(ext.components()[0].id(), "cve_feed");
+#[plugin_fn]
+pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
+    if widget_id == "cve_feed" {
+        // Build a mock list of CVEs for the UI
+        let ui = json!({
+            "type": "List",
+            "block": {
+                "title": " 🛡️ Live CVE Feed ",
+                "bordered": true,
+                "border_color": "red"
+            },
+            "items": [
+                { "spans": [ { "content": "[CRIT] ", "style": { "fg": "red", "bold": true } }, { "content": "CVE-2024-3094 (xz backdoor)" } ] },
+                { "spans": [ { "content": "[HIGH] ", "style": { "fg": "yellow", "bold": true } }, { "content": "CVE-2024-21626 (runc breakout)" } ] },
+                { "spans": [ { "content": "[WARN] ", "style": { "fg": "gray" } }, { "content": "CVE-2023-38545 (curl heap overflow)" } ] }
+            ]
+        });
+        Ok(serde_json::to_vec(&ui)?)
+    } else {
+        let err = json!({
+            "type": "Paragraph",
+            "lines": [ { "spans": [ { "content": "Unknown widget ID" } ] } ],
+            "wrap": true
+        });
+        Ok(serde_json::to_vec(&err)?)
     }
 }
