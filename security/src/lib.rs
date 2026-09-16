@@ -4,7 +4,7 @@ use ratatui::text::Span;
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
 
-use vanta::extension::{Component, Extension, ExtensionMetadata, Page};
+use vanta::extension::{Component, Extension, ExtensionMetadata};
 use vanta::theme::Theme;
 
 pub struct CveFeedComponent;
@@ -43,5 +43,19 @@ impl Extension for SecurityExtension {
 
     fn components(&self) -> Vec<Box<dyn Component>> {
         vec![Box::new(CveFeedComponent)]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_security_extension_metadata() {
+        let ext = SecurityExtension;
+        let meta = ext.metadata();
+        assert_eq!(meta.id, "security");
+        assert_eq!(ext.components().len(), 1);
+        assert_eq!(ext.components()[0].id(), "cve_feed");
     }
 }
