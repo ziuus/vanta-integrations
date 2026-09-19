@@ -14,12 +14,12 @@
     {
       "id": "crypto_coin",
       "name": "3D Rotating Coin",
-      "description": "A rotating 3D crypto coin visualization.",
-      "version": "1.0.0",
+      "description": "High-detail mathematically rendered 3D crypto coin visualization.",
+      "version": "1.1.0",
       "api_version": "0.9.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
-      "sha256": "8ed91f63363615393981c7c244f07d0f1a37190b411bacc09612812bd5c8dd64"
+      "sha256": "53ffa2070cea8ff4fe64a90476addb8c108e274e0a31515b79ee5b5cc84debaa"
     }
   ]
 }
