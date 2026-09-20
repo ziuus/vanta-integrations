@@ -191,18 +191,52 @@ it builds `vanta_security.wasm` but is published as `artifacts/security.wasm`.
 The **file stem does not have to match the extension id** — the host reads the
 id from `metadata()`, not the filename.
 
+### 1.9 Findings from building the first real extension (M2/M3)
+
+* **Widget ids share one global namespace.** The dashboard dispatcher matches
+  a layout entry against *either* a widget id or an extension id
+  (`screens/dashboard.rs`), across all loaded extensions. Two extensions
+  exposing the same widget id would collide, first match winning. This is why
+  `resource_timeline` ships as a **widget of `system_observatory`** rather than
+  the separate extension of roadmap §12 — a standalone one would clash.
+* **Border style is host-controlled.** Plugins set `bordered: true`; the host
+  picks the glyphs. It used to draw square corners while native panels use
+  `BorderType::Rounded`, making every extension look foreign. Fixed in the
+  host (`src/ui_renderer.rs`), not per plugin.
+* **Query once per frame, not once per widget.** The host calls
+  `render_widget` separately for each widget, so five widgets each querying
+  six topics is 30 host round-trips per frame. A short-TTL cache
+  (`system_observatory/src/state.rs`) fixes both the cost and the correctness
+  problem of panels disagreeing within one frame.
+* **Measured render cost** (debug host, release plugin): first call of a frame
+  ~7 ms (cold: six queries + capabilities), cached calls 0.2–2.9 ms. The
+  budget is 10 ms per call, so the cold path has less headroom than it looks —
+  do not add more topics to a single refresh without measuring.
+* **State persists across calls.** `thread_local!` + `RefCell` works and is
+  preferable to `static mut` (no `static_mut_refs` lint, same cost). WASM
+  plugins are single-threaded.
+* **`wrap: true` is needed for any line that can exceed a narrow cell.**
+  With `wrap: false` the host clips, silently hiding content.
+* **A plugin cannot know its area**, so graph widths are fixed constants
+  chosen for a 3-column 80-wide dashboard (18 cells) and full-width rows
+  (40 cells); wider terminals simply leave space on the right.
+
 ---
 
 ## 2. Current State
 
-| Extension | Status | Data | Notes |
+| Component | Status | Data | Notes |
 |---|---|---|---|
-| `security` | shipped, v0.1.0 | **mock** | 1 widget `cve_feed`; hard-coded CVEs |
-| `crypto_coin` | shipped, v1.1.0 | none (pure math) | 1 widget `coin`; 3D raymarched |
-| everything in roadmap | **not started** | blocked on 1.4/1.5 | needs host telemetry |
+| host `vanta_query` | **shipped** (vanta `92d5fbc`) | real | 9 topics + capabilities; 88 host tests green |
+| host rounded borders | **shipped** (vanta `41482e5`) | — | extension panels now match native chrome |
+| `vanta-ext-sdk` | **shipped** (`8eff279`) | — | telemetry client, bounded history, UI primitives; 18 tests |
+| `system_observatory` | **shipped** (`96698a1`) | **real** | 5 widgets; 8 tests; artifact + registry published |
+| `security` | shipped, v0.1.0 | **mock** | 1 widget `cve_feed`; unchanged, still hard-coded |
+| `crypto_coin` | shipped, v1.1.0 | none (pure math) | 1 widget `coin`; unchanged |
+| rest of roadmap | not started | — | see §4 |
 
-Nothing in this repo is broken. Both artifacts build and their registry hashes
-are correct.
+Nothing in this repo is broken. All three artifacts build and every registry
+sha256 was verified against its committed artifact.
 
 ## 3. Known Limitations (host, as of 0.10.25)
 
@@ -213,67 +247,111 @@ are correct.
 - No persistent state across calls except WASM linear memory (`static mut`),
   which *does* persist between calls within a process (used by `crypto_coin`
   for its animation tick).
-- Container/Docker, git state, systemd journal, connection tables: **not
-  collected by the host at all** — even after the telemetry host function
-  these remain unavailable until the host collects them.
+- Container/Docker, git state, systemd journal, connection tables,
+  per-interface network: **not collected by the host at all** — even with the
+  telemetry host function these stay unavailable until the host collects them.
+  `{"topic":"capabilities"}` returns this list at runtime.
+- `cargo clippy --workspace -- -D warnings` currently **fails on 24
+  pre-existing lints in `crypto_coin`** (`manual_range_contains` etc., from
+  commit `fdc5f94`). New crates are clean. These were deliberately left alone:
+  fixing them changes a published artifact's source without rebuilding it,
+  which would put source and the registry sha256 out of step. Fix and
+  republish the artifact together, in one commit.
 
 ## 4. Remaining Work
 
-- [ ] **M1** Host: `vanta_query` host function exposing existing telemetry + docs.
-- [ ] **M2** SDK crate (`vanta-ext-sdk`) — typed query wrappers + UI builders
-      (sparkline, bar, table, metric rows) composed from spans.
-- [ ] **M3** `system_observatory` — first real-telemetry extension, end-to-end
-      proof (build → artifact → registry → `vanta ext install` → renders).
-- [ ] **M4** `process_explorer` (host already has process snapshots).
-- [ ] **M5** `network_command` (host has interface rx/tx; connection table is
-      *not* collected → document as unavailable, do not fake).
-- [ ] **M6** `resource_timeline` / `event_stream` (bounded rolling buffers in
-      plugin memory; note the no-tick constraint — history advances per render).
-- [ ] **M7** `developer_workspace`, `container_fleet` — require new host
-      collectors (git, container runtime). Scope only after M1–M5.
-- [ ] Improve `security` (replace mock with real data once a source exists) and
-      `crypto_coin` (compact market widgets need network → blocked).
+- [x] **M1** Host `vanta_query` telemetry API + docs.
+- [x] **M2** `vanta-ext-sdk` — telemetry client, history, UI primitives.
+- [x] **M3** `system_observatory` — first real-telemetry extension, proven
+      end-to-end (build → artifact → registry → live render in Vanta).
+- [ ] **M4** `process_explorer`. Host already serves pid/ppid/cpu/rss/state/
+      threads/uid/io, so `process_tree`, `process_cpu`, `process_memory`,
+      `process_io`, `process_top` are all buildable today. Note: WASM widgets
+      receive **no key events**, so sorting/filtering cannot be interactive —
+      expose sort order via `[extensions.process_explorer]` config instead...
+      except config is not passed to plugins either (§1.3), so the first
+      version must ship fixed, sensible orderings per widget.
+- [ ] **M5** `network_command`. Only aggregate rx/tx exists. `interface_status`,
+      `connection_table` and `network_topology` need host collectors that do
+      not exist — either add them to the host first or ship the extension with
+      explicit unavailable panels. Do **not** fabricate interfaces.
+- [ ] **M6** `event_stream`. No host event source exists. Designing it means
+      first deciding where events come from (host collector vs. derived from
+      telemetry transitions in the plugin). Deriving from telemetry deltas is
+      honest and needs no host change — prefer that for v1.
+- [ ] **M7** `container_fleet`, `developer_workspace` — both require new host
+      collectors (container runtime, git). Scope only after M4/M5.
+- [ ] Improve `security` (still mock; needs a real CVE source, which needs
+      host network access — currently impossible) and `crypto_coin` (market
+      data likewise needs network).
+- [ ] Optional: fix 24 pre-existing clippy lints in `crypto_coin` (see §5).
 
 ---
 
 ## Resume Point
 
 **Last completed:**
-Phase 0 architecture audit, with empirical capability probe. Findings recorded
-in sections 1.1–1.8 above. `vanta/examples/probe_host.rs` added to the host repo
-as a reusable headless plugin inspector.
+M3 — `system_observatory`, the first extension running on real host telemetry,
+proven end-to-end: built for `wasm32-wasip1`, copied into
+`~/.config/vanta/extensions/`, enabled in `config.toml`, and rendered in a
+live Vanta session with its numbers matching the native panels (load
+`3.33 3.84 3.24`, disk 88%). Artifact committed and registry entry carries its
+real sha256. Also M1 (host `vanta_query`) and M2 (`vanta-ext-sdk`).
+
+Commits — host (`../vanta`): `92d5fbc` telemetry API, `41482e5` rounded
+borders. Integrations: `de3e716` audit, `8eff279` sdk, `96698a1`
+system_observatory.
 
 **Currently working on:**
-M1 — adding the `vanta_query` host function to the host repo so extensions can
-read telemetry Vanta already samples.
+Nothing in flight. The tree is clean and validated in both repos.
 
 **Next action:**
-In `../vanta`: add host function(s) to `Plugin::new(&manifest, [], true)` in
-`src/extension/wasm.rs`, serving a JSON request/response backed by
-`monitors::{summary, cpu, memory, network, disk, gpu, processes}`. Keep the
-`0.9*` api_version gate intact (see 1.5). Then document the capability in
-`vanta/docs/EXTENSIONS.md` and re-run the probe to prove it end-to-end.
+M4 `process_explorer`. All required data already exists in the
+`{"topic":"processes","limit":N}` response (pid, ppid, name, cmdline, cpu_pct,
+mem_kb, state, threads, uid, read_bps, write_bps) — no host change needed.
+Suggested widgets: `process_explorer` (overview + top table), `process_tree`
+(build the hierarchy from ppid; note the host returns only the top N by CPU,
+so parents may be missing — render orphans at root rather than dropping them),
+`process_cpu`, `process_memory`, `process_io`, `process_activity`.
+Copy the shape of `system_observatory`: a `state.rs` with a short-TTL shared
+snapshot, pure logic in its own module with unit tests, widgets in `lib.rs`.
+Reuse `vanta_ext_sdk::ui::Table` — it already pads and clips per column.
 
-**Files being modified:**
-- `../vanta/src/extension/wasm.rs` (host functions)
-- `../vanta/docs/EXTENSIONS.md` (capability documentation)
-- `../vanta/examples/probe_host.rs` (verification harness, already added)
-- this document
+**Files to create:**
+- `process_explorer/{Cargo.toml,README.md}`
+- `process_explorer/src/{lib.rs,state.rs,tree.rs}`
+- add to workspace `members`, then artifact + `registry.json` entry.
 
 **Known issues:**
-- `cargo run --release --example ...` in the host OOMs (LTO). Use debug.
-- `rustup target add wasm32-wasip1` errors with a component conflict but the
-  target **is** installed and builds fine — ignore that error.
+- `cargo clippy --workspace -- -D warnings` fails on **24 pre-existing lints in
+  `crypto_coin`** only. Validate new crates with `-p <crate>`; see §3 for why
+  they were not fixed in isolation.
+- Host `cargo run --release --example ...` OOMs (LTO). Use the debug profile.
+- `rustup target add wasm32-wasip1` reports a component conflict; the target is
+  installed and builds fine. Ignore.
 
-**Validation status:**
-- `vanta-integrations`: `cargo build --target wasm32-wasip1 --release` passes;
-  both artifacts build; registry sha256 values verified against artifacts.
-- host: `cargo test` 73 passing, clippy clean (pre-existing state, untouched).
+**Validation status (all re-run at the end of this session):**
+- `cargo test -p vanta-ext-sdk` — 18 passed
+- `cargo test -p system-observatory` — 8 passed
+- `cargo clippy -p vanta-ext-sdk -p system-observatory --all-targets -D warnings` — clean
+- `cargo fmt --all -- --check` — clean
+- `cargo build --target wasm32-wasip1 --release` — all crates build
+- registry sha256 verified against all three committed artifacts
+- host `cargo test` — 88 passed; host builds in release
+- live render in Vanta confirmed on the Dashboard page
 
 **Do not redo:**
-- The capability probe. The answer is definitive: no FS, no net, no env, no
-  config inside plugins (1.3). Do not re-litigate by "trying `std::fs` again".
-- Do not attempt to build roadmap extensions on mock data — that is the exact
-  failure mode this audit exists to prevent.
-- Do not bump plugin `api_version` above `0.9.x` until the gate in **both**
-  `wasm.rs` and `cli.rs` is widened.
+- The capability probe (§1.3). Definitive: no FS, no network, no env, no
+  config inside plugins. Telemetry comes only from `vanta_query`.
+- The host telemetry API. It works; add topics to it rather than replacing it.
+- The shared-snapshot pattern and SDK primitives (sparkline, braille, table,
+  meters, bounded history) — reuse them, do not reimplement per extension.
+- Do not fix `crypto_coin` lints without rebuilding and republishing its
+  artifact and sha256 in the same commit.
+- Do not build roadmap extensions on mock data.
+
+**User's environment left untouched:**
+`~/.config/vanta/config.toml` was temporarily modified for the live test and
+**restored** from `/tmp/vanta-cfg.bak`; `enabled = ["crypto_coin"]` and the
+original layout are back. `system_observatory.wasm` remains installed in
+`~/.config/vanta/extensions/` but is not enabled, so it does not load.
