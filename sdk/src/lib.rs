@@ -7,6 +7,8 @@
 //! * [`history`] — bounded, wall-clock-throttled rolling buffers.
 //! * [`ui`] — protocol widgets plus the primitives (sparkline, bar, table)
 //!   that the host protocol does not provide.
+//! * [`viz`] — denser visualizations: state machines, threshold gauges,
+//!   duration meters, activity strips, signal strips with markers.
 //!
 //! See `docs/integration-development.md` for the platform constraints that
 //! shape all three.
@@ -14,6 +16,7 @@
 pub mod history;
 pub mod telemetry;
 pub mod ui;
+pub mod viz;
 
 pub use history::History;
 pub use ui::{Block, Color, Line, Style, Widget};

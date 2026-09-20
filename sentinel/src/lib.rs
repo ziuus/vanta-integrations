@@ -25,6 +25,7 @@ use std::cell::RefCell;
 use vanta_ext_sdk::history::now_ms;
 use vanta_ext_sdk::telemetry::{self, Cpu, Disk, Memory, Process};
 use vanta_ext_sdk::ui::{self, Block, Color, Line, Style, Widget};
+use vanta_ext_sdk::viz;
 use vanta_ext_sdk::{ExtensionMetadata, API_VERSION_TELEMETRY};
 
 use health::Level;
@@ -65,6 +66,9 @@ struct Store {
     disk: Option<Disk>,
     error: Option<String>,
     started_ms: u64,
+    /// Host capability report, fetched once.
+    caps: Option<vanta_ext_sdk::telemetry::Capabilities>,
+    caps_done: bool,
 }
 
 thread_local! {
@@ -78,6 +82,8 @@ thread_local! {
         disk: None,
         error: None,
         started_ms: 0,
+        caps: None,
+        caps_done: false,
     });
 }
 
@@ -107,6 +113,19 @@ fn with_store<R>(f: impl FnOnce(&Store) -> R) -> R {
         ),
         Err(_) => (0, false),
     });
+
+    // Capabilities describe the host build and cannot change while it runs,
+    // so this happens exactly once and never on the hot path again.
+    let need_caps = STORE.with(|s| s.try_borrow().map(|st| !st.caps_done).unwrap_or(false));
+    if need_caps {
+        let caps = telemetry::capabilities().ok();
+        STORE.with(|s| {
+            if let Ok(mut st) = s.try_borrow_mut() {
+                st.caps = caps;
+                st.caps_done = true;
+            }
+        });
+    }
 
     if due {
         // ── no borrow held across these host calls ──
@@ -175,6 +194,8 @@ fn with_store<R>(f: impl FnOnce(&Store) -> R) -> R {
             disk: None,
             error: Some("state busy".into()),
             started_ms: now,
+            caps: None,
+            caps_done: true,
         }),
     })
 }
@@ -219,9 +240,11 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 pub fn widgets() -> FnResult<Vec<u8>> {
     Ok(serde_json::to_vec(&[
         "sentinel",
+        "incident",
         "incidents",
         "sentinel_events",
         "incident_context",
+        "sentinel_coverage",
     ])?)
 }
 
@@ -229,9 +252,11 @@ pub fn widgets() -> FnResult<Vec<u8>> {
 pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
     let w = with_store(|st| match widget_id.as_str() {
         "sentinel" => overview(st),
+        "incident" => detail(st),
         "incidents" => incidents(st),
         "sentinel_events" => events(st),
         "incident_context" => context(st),
+        "sentinel_coverage" => coverage(st),
         other => ui::unavailable("sentinel", &format!("no widget named '{other}'")),
     });
     Ok(w.to_json())
@@ -331,90 +356,61 @@ fn staleness(st: &Store, now: u64) -> Option<String> {
         .then(|| format!("stale · last sample {}", fmt_ago(now, last)))
 }
 
-// ── sentinel: current state ───────────────────────────────────────────────
+// ── Component: live incident header ───────────────────────────────────────
 
-fn overview(st: &Store) -> Widget {
-    if let Some(w) = telemetry_down(st, "sentinel") {
-        return w;
-    }
-    let now = now_ms();
-    let eng = &st.watcher.engine;
-    let mut lines: Vec<Line> = Vec::with_capacity(10);
-
-    let worst = eng.worst_active_level();
-    let (dot, label, col) = match worst {
-        None => ("●", "NOMINAL".to_string(), Color::GREEN),
-        Some(l) => (
-            "●",
-            format!(
-                "{} INCIDENT{}",
-                eng.active_count(),
-                if eng.active_count() == 1 { "" } else { "S" }
+/// `▲ CRITICAL  cpu utilisation   97%  ≥85%   4m12s  persisting`
+///
+/// Answers severity, condition, value, threshold, duration and state in one
+/// line, so it can head any panel without costing vertical space.
+fn incident_header(i: &Incident, now: u64) -> Vec<Line> {
+    let c = level_color(i.level);
+    vec![
+        Line::new(vec![
+            ui::span("▲ ", Style::fg(c.clone()).bold()),
+            ui::span(
+                format!("{:<9}", severity_word(i.level)),
+                Style::fg(c.clone()).bold(),
             ),
-            level_color(l),
-        ),
-    };
-    lines.push(Line::new(vec![
-        ui::span(format!("{dot} "), Style::fg(col.clone()).bold()),
-        ui::span(label, Style::fg(col).bold()),
-        ui::span(
-            format!("   watching {} conditions", watched_count(st)),
-            Style::dim(),
-        ),
-    ]));
-
-    if let Some(s) = staleness(st, now) {
-        lines.push(Line::text(s, Style::fg(Color::YELLOW)));
-    }
-
-    if eng.active_count() == 0 {
-        lines.push(Line::blank());
-        let recent = eng.closed().next();
-        match recent {
-            Some(i) => lines.push(Line::new(vec![
-                ui::span("last  ", Style::dim()),
-                ui::raw(format!(
-                    "{} recovered after {}, {}",
-                    i.metric,
-                    fmt_dur(i.duration_ms(i.closed_ms.unwrap_or(now))),
-                    fmt_ago(now, i.closed_ms.unwrap_or(now))
-                )),
-            ])),
-            None => lines.push(Line::text("no incidents since start", Style::dim())),
-        }
-        lines.push(Line::blank());
-        lines.push(Line::text(
-            format!(
-                "{} samples · {}",
-                eng.sample_count,
-                fmt_dur(now.saturating_sub(st.started_ms))
+            ui::span(
+                format!("{:<18}", ui::truncate(&i.metric, 18)),
+                Style::default(),
             ),
-            Style::dim(),
-        ));
-        return Widget::paragraph(lines).block(block(st, "sentinel"));
-    }
-
-    lines.push(Line::blank());
-    // Active incidents, worst first, then longest running.
-    let mut active: Vec<&Incident> = eng.active().collect();
-    active.sort_by(|a, b| b.level.cmp(&a.level).then(a.opened_ms.cmp(&b.opened_ms)));
-    for i in active.iter().take(6) {
-        lines.push(incident_line(i, now));
-    }
-    Widget::paragraph(lines).block(block(st, "sentinel"))
+            ui::span(i.state.label(), Style::fg(state_color(i.state))),
+        ]),
+        Line::new(vec![
+            ui::span("  ", Style::dim()),
+            ui::span(
+                format!("{:<8}", fmt_val(&i.key, i.current)),
+                Style::fg(c).bold(),
+            ),
+            ui::span(
+                format!("≥{:<8}", fmt_val(&i.key, i.threshold)),
+                Style::dim(),
+            ),
+            ui::span(
+                format!("{:<9}", fmt_dur(i.duration_ms(now))),
+                Style::default(),
+            ),
+            ui::span(format!("peak {}", fmt_val(&i.key, i.peak)), Style::dim()),
+        ]),
+    ]
 }
 
-/// `▲ crit  cpu utilisation   99% (peak 99%)  4m12s  persisting`
+fn severity_word(l: Level) -> &'static str {
+    match l {
+        Level::Critical => "CRITICAL",
+        Level::Warn => "WARNING",
+        Level::Ok => "OK",
+    }
+}
+
+/// Compact single line used in lists: fits a 46-column panel.
 fn incident_line(i: &Incident, now: u64) -> Line {
     let c = level_color(i.level);
-    let mark = match i.level {
-        Level::Critical => "▲",
-        _ => "▲",
-    };
     Line::new(vec![
-        ui::span(format!("{mark} "), Style::fg(c.clone()).bold()),
+        ui::span("▲ ", Style::fg(c.clone()).bold()),
         ui::span(
-            format!("{:<16}", ui::truncate(&i.metric, 16)),
+            format!("{:<15}", ui::truncate(&i.metric, 15)),
             Style::fg(c.clone()),
         ),
         ui::span(
@@ -422,39 +418,330 @@ fn incident_line(i: &Incident, now: u64) -> Line {
             Style::fg(c).bold(),
         ),
         ui::span(
-            format!(" peak {:>6}", fmt_val(&i.key, i.peak)),
-            Style::dim(),
-        ),
-        ui::span(
-            format!("  {:>7}", fmt_dur(i.duration_ms(now))),
+            format!("{:>8}", fmt_dur(i.duration_ms(now))),
             Style::default(),
         ),
         ui::span(
-            format!("  {}", i.state.label()),
+            format!(" {}", short_state(i.state)),
             Style::fg(state_color(i.state)),
         ),
     ])
 }
 
-fn watched_count(st: &Store) -> usize {
-    let mut n = 0;
-    if st.cpu.is_some() {
-        n += 2; // cpu, load
-        if st.cpu.as_ref().and_then(|c| c.max_temp_c).is_some() {
-            n += 1;
-        }
+fn short_state(s: State) -> &'static str {
+    match s {
+        State::Pending => "det",
+        State::Open => "open",
+        State::Persisting => "persist",
+        State::Closed => "closed",
     }
-    if let Some(m) = &st.memory {
-        n += 1;
-        if m.swap_total_bytes > 0 {
-            n += 1;
-        }
-    }
-    n += st.disk.as_ref().map(|d| d.mounts.len()).unwrap_or(0);
-    n
 }
 
-// ── incidents: active + recent history ────────────────────────────────────
+// ── Component: incident state machine ─────────────────────────────────────
+
+const STAGES: [&str; 5] = ["norm", "det", "open", "persist", "recov"];
+
+fn stage_index(s: State) -> usize {
+    match s {
+        State::Pending => 1,
+        State::Open => 2,
+        State::Persisting => 3,
+        State::Closed => 4,
+    }
+}
+
+// ── Component: incident pulse ─────────────────────────────────────────────
+
+/// The incident's own progression, independent of the metric's value:
+/// detection → open → persistence, with the duration meter beneath.
+///
+/// Answers "how far through its life is this incident" — a question the
+/// signal strip cannot answer because a flat 99% looks the same at 2s and
+/// at 20 minutes.
+fn incident_pulse(i: &Incident, now: u64, width: usize) -> Vec<Line> {
+    let elapsed = i.duration_ms(now);
+    let meter = viz::duration_meter(elapsed, &[10, 60, 300, 1800], width.min(20));
+    vec![
+        viz::state_machine(&STAGES, stage_index(i.state), level_color(i.level)),
+        Line::new(
+            [
+                vec![ui::span(
+                    format!("held {:<6}", fmt_dur(elapsed)),
+                    Style::fg(level_color(i.level)),
+                )],
+                meter.spans,
+                vec![ui::span(" 30m+", Style::dim())],
+            ]
+            .concat(),
+        ),
+    ]
+}
+
+// ── Component: threshold / breach gauge ───────────────────────────────────
+
+/// Where the value sits relative to Sentinel's own detection bands.
+fn breach_gauge(i: &Incident, width: usize) -> Vec<Line> {
+    let scale = watch::scale_for(&i.key);
+    let gauge = viz::threshold_gauge(
+        i.current,
+        i.clear_threshold,
+        i.threshold,
+        scale,
+        width.min(26),
+        level_color(i.level),
+    );
+    let mut out = Vec::with_capacity(2);
+    for (n, l) in gauge.into_iter().enumerate() {
+        let label = if n == 0 {
+            ui::span(
+                format!("{:<6}", fmt_val(&i.key, i.current)),
+                Style::fg(level_color(i.level)).bold(),
+            )
+        } else {
+            ui::span("      ", Style::dim())
+        };
+        let mut spans = vec![label];
+        spans.extend(l.spans);
+        if n == 1 {
+            spans.push(ui::span(
+                format!(
+                    " clr{} trg{}",
+                    fmt_val(&i.key, i.clear_threshold),
+                    fmt_val(&i.key, i.threshold)
+                ),
+                Style::dim(),
+            ));
+        }
+        out.push(Line::new(spans));
+    }
+    out
+}
+
+// ── Component: signal strip with temporal markers ─────────────────────────
+
+/// The underlying signal around the incident, with markers for open (▲),
+/// peak (◆) and recovery (▼). This is the before / during / after view.
+fn signal_block(st: &Store, i: &Incident, width: usize) -> Vec<Line> {
+    let Some(sig) = st.watcher.signal(&i.key) else {
+        return vec![Line::text("no signal history yet", Style::dim())];
+    };
+    let vals = sig.values();
+    if vals.is_empty() {
+        return vec![Line::text("no signal history yet", Style::dim())];
+    }
+    let mut markers = Vec::new();
+    if let Some(o) = sig.opened_at.and_then(|x| sig.offset_of(x)) {
+        markers.push(viz::Marker {
+            at: o,
+            glyph: '▲',
+            color: level_color(i.level),
+        });
+    }
+    if let Some(p) = sig.peak_at.and_then(|x| sig.offset_of(x)) {
+        markers.push(viz::Marker {
+            at: p,
+            glyph: '◆',
+            color: Color::WHITE,
+        });
+    }
+    if let Some(c) = sig.closed_at.and_then(|x| sig.offset_of(x)) {
+        markers.push(viz::Marker {
+            at: c,
+            glyph: '▼',
+            color: Color::GREEN,
+        });
+    }
+    let w = width.min(40);
+    let (signal, marks) = viz::signal_strip(
+        vals,
+        i.threshold,
+        w,
+        &markers,
+        Color::CYAN,
+        level_color(i.level),
+    );
+    let mut sig_line = vec![ui::span("sig    ", Style::dim())];
+    sig_line.extend(signal.spans);
+    let mut mark_line = vec![ui::span("       ", Style::dim())];
+    mark_line.extend(marks.spans);
+    vec![
+        Line::new(sig_line),
+        Line::new(mark_line),
+        Line::new(vec![
+            ui::span("       ", Style::dim()),
+            ui::span(
+                format!(
+                    "{:<w$}",
+                    format!("◀ {} samples", vals.len().min(w)),
+                    w = w.saturating_sub(3)
+                ),
+                Style::dim(),
+            ),
+            ui::span("now", Style::dim()),
+        ]),
+        Line::new(vec![
+            ui::span("       ", Style::dim()),
+            ui::span("▲ opened  ◆ peak  ▼ recovered", Style::dim()),
+        ]),
+    ]
+}
+
+// ── Widget: sentinel (status + active incidents) ──────────────────────────
+
+fn overview(st: &Store) -> Widget {
+    if let Some(w) = telemetry_down(st, "sentinel") {
+        return w;
+    }
+    let now = now_ms();
+    let eng = &st.watcher.engine;
+    let mut lines: Vec<Line> = Vec::with_capacity(14);
+
+    lines.extend(status_bar(st, now));
+    if let Some(s) = staleness(st, now) {
+        lines.push(Line::text(s, Style::fg(Color::YELLOW)));
+    }
+    lines.push(Line::blank());
+
+    let mut active: Vec<&Incident> = eng.active().collect();
+    active.sort_by(|a, b| b.level.cmp(&a.level).then(a.opened_ms.cmp(&b.opened_ms)));
+
+    if active.is_empty() {
+        lines.push(Line::text("no active incidents", Style::fg(Color::GREEN)));
+        lines.push(Line::blank());
+        match eng.closed().next() {
+            Some(i) => {
+                let end = i.closed_ms.unwrap_or(now);
+                lines.push(Line::new(vec![
+                    ui::span("last   ", Style::dim()),
+                    ui::raw(format!(
+                        "{} recovered after {}",
+                        ui::truncate(&i.metric, 18),
+                        fmt_dur(i.duration_ms(end))
+                    )),
+                ]));
+                lines.push(Line::new(vec![
+                    ui::span("       ", Style::dim()),
+                    ui::span(fmt_ago(now, end), Style::dim()),
+                ]));
+            }
+            None => lines.push(Line::text("no incidents since start", Style::dim())),
+        }
+    } else {
+        // Headline incident gets the full header; the rest are compact.
+        lines.extend(incident_header(active[0], now));
+        for i in active.iter().skip(1).take(5) {
+            lines.push(incident_line(i, now));
+        }
+        lines.extend(incident_pulse(active[0], now, 24));
+    }
+
+    lines.push(Line::blank());
+    lines.push(activity_line(st, now, 26));
+
+    Widget::paragraph(lines).block(block(st, "sentinel"))
+}
+
+/// Two lines so it survives a narrow panel:
+/// `● 2 ACTIVE  1 crit 1 warn` / `8 watched · 142 samples · 12m`
+fn status_bar(st: &Store, now: u64) -> Vec<Line> {
+    let eng = &st.watcher.engine;
+    let n = eng.active_count();
+    let crit = eng.active().filter(|i| i.level == Level::Critical).count();
+    let warn = n - crit;
+    let (col, label) = match eng.worst_active_level() {
+        None => (Color::GREEN, "NOMINAL".to_string()),
+        Some(l) => (level_color(l), format!("{n} ACTIVE")),
+    };
+    let mut top = vec![
+        ui::span("● ", Style::fg(col.clone()).bold()),
+        ui::span(format!("{label:<10}"), Style::fg(col).bold()),
+    ];
+    if crit > 0 {
+        top.push(ui::span(format!("{crit} crit "), Style::fg(Color::RED)));
+    }
+    if warn > 0 {
+        top.push(ui::span(format!("{warn} warn"), Style::fg(Color::YELLOW)));
+    }
+    vec![
+        Line::new(top),
+        Line::text(
+            format!(
+                "{} watched · {} samples · {}",
+                watched_count(st),
+                eng.sample_count,
+                fmt_dur(now.saturating_sub(st.started_ms))
+            ),
+            Style::dim(),
+        ),
+    ]
+}
+
+/// Event activity over the last 5 minutes.
+fn activity_line(st: &Store, now: u64, width: usize) -> Line {
+    let stamps: Vec<u64> = st.watcher.engine.events().map(|e| e.at_ms).collect();
+    Line::new(vec![
+        ui::span("activity ", Style::dim()),
+        ui::span(
+            viz::density_strip(&stamps, now, 300_000, width),
+            Style::fg(if stamps.is_empty() {
+                Color::DARK_GRAY
+            } else {
+                Color::CYAN
+            }),
+        ),
+        ui::span("  5m", Style::dim()),
+    ])
+}
+
+fn watched_count(st: &Store) -> usize {
+    let sample = Sample {
+        cpu: st.cpu.as_ref(),
+        memory: st.memory.as_ref(),
+        disk: st.disk.as_ref(),
+        processes: None,
+    };
+    watch::measured(&sample).len()
+}
+
+// ── Widget: incident detail (pulse + gauge + signal) ──────────────────────
+
+fn detail(st: &Store) -> Widget {
+    if let Some(w) = telemetry_down(st, "incident") {
+        return w;
+    }
+    let now = now_ms();
+    let eng = &st.watcher.engine;
+    let target = eng
+        .active()
+        .max_by(|a, b| a.level.cmp(&b.level).then(b.opened_ms.cmp(&a.opened_ms)))
+        .or_else(|| eng.closed().next());
+
+    let Some(i) = target else {
+        return Widget::Paragraph {
+            lines: vec![
+                Line::text("no incident to inspect", Style::fg(Color::GREEN)),
+                Line::blank(),
+                Line::text(
+                    "this panel opens on the most severe active incident, or the most recent recovered one",
+                    Style::dim(),
+                ),
+            ],
+            block: Some(block(st, "incident")),
+            wrap: true,
+        };
+    };
+
+    // Ordered by value: the host gives extension panels only ~5 inner rows
+    // by default, so the header and state must land first and the signal
+    // strip is what gets cut when the panel is short.
+    let mut lines = incident_header(i, now);
+    lines.extend(incident_pulse(i, now, 24));
+    lines.extend(breach_gauge(i, 26));
+    lines.extend(signal_block(st, i, 30));
+    Widget::paragraph(lines).block(block(st, "incident"))
+}
+
+// ── Widget: incidents (active + recovered + comparison) ───────────────────
 
 fn incidents(st: &Store) -> Widget {
     if let Some(w) = telemetry_down(st, "incidents") {
@@ -480,37 +767,49 @@ fn incidents(st: &Store) -> Widget {
             lines.push(Line::blank());
         }
         lines.push(Line::text("recovered", Style::dim()));
+
+        // Duration bars make relative severity-over-time comparable at a
+        // glance; the absolute value is printed alongside.
+        let longest = closed
+            .iter()
+            .map(|i| i.duration_ms(i.closed_ms.unwrap_or(now)))
+            .max()
+            .unwrap_or(1)
+            .max(1);
         for i in closed.iter().take(10) {
             let end = i.closed_ms.unwrap_or(now);
+            let d = i.duration_ms(end);
+            let bar_w = 8usize;
+            let filled = ((d as f64 / longest as f64) * bar_w as f64).round() as usize;
             lines.push(Line::new(vec![
                 ui::span("· ", Style::dim()),
                 ui::span(
-                    format!("{:<16}", ui::truncate(&i.metric, 16)),
+                    format!("{:<15}", ui::truncate(&i.metric, 15)),
                     Style::default(),
                 ),
                 ui::span(
                     format!("{:>6}", fmt_val(&i.key, i.peak)),
                     Style::fg(level_color(i.level)),
                 ),
-                ui::span(" peak       ", Style::dim()),
-                ui::span(
-                    format!("{:>7}", fmt_dur(i.duration_ms(end))),
-                    Style::default(),
-                ),
+                ui::span(" ", Style::dim()),
+                ui::span("▬".repeat(filled), Style::fg(Color::GRAY)),
+                ui::span("·".repeat(bar_w - filled), Style::dim()),
+                ui::span(format!(" {:>8}", fmt_dur(d)), Style::default()),
                 ui::span(format!("  {}", fmt_ago(now, end)), Style::dim()),
             ]));
         }
     }
 
     if lines.is_empty() {
-        lines.push(Line::text("no incidents recorded", Style::dim()));
-        lines.push(Line::blank());
-        lines.push(Line::text(
-            "an incident opens when a watched condition stays over threshold",
-            Style::dim(),
-        ));
         return Widget::Paragraph {
-            lines,
+            lines: vec![
+                Line::text("no incidents recorded", Style::dim()),
+                Line::blank(),
+                Line::text(
+                    "an incident opens when a watched condition stays over its threshold long enough to rule out a spike",
+                    Style::dim(),
+                ),
+            ],
             block: Some(block(st, "incidents")),
             wrap: true,
         };
@@ -518,7 +817,7 @@ fn incidents(st: &Store) -> Widget {
     Widget::paragraph(lines).block(block(st, "incidents"))
 }
 
-// ── sentinel_events: transition feed ──────────────────────────────────────
+// ── Widget: event stream + density ────────────────────────────────────────
 
 fn events(st: &Store) -> Widget {
     if let Some(w) = telemetry_down(st, "events") {
@@ -532,7 +831,7 @@ fn events(st: &Store) -> Widget {
                 Line::text("no state changes yet", Style::dim()),
                 Line::blank(),
                 Line::text(
-                    "events appear when an incident opens, escalates, persists or recovers",
+                    "events are recorded when an incident opens, escalates, persists or recovers",
                     Style::dim(),
                 ),
             ],
@@ -540,37 +839,34 @@ fn events(st: &Store) -> Widget {
             wrap: true,
         };
     }
-    let lines = evs
-        .iter()
-        .take(16)
-        .map(|e| {
-            let c = match e.kind {
-                EventKind::Closed => Color::GREEN,
-                EventKind::Escalated => Color::RED,
-                _ => level_color(e.level),
-            };
-            let mut spans = vec![
-                ui::span(format!("{:>8} ", fmt_ago(now, e.at_ms)), Style::dim()),
-                ui::span(
-                    format!("{:<10}", e.kind.label()),
-                    Style::fg(c.clone()).bold(),
-                ),
-                ui::span(
-                    format!("{:<16}", ui::truncate(&e.metric, 16)),
-                    Style::default(),
-                ),
-                ui::span(format!("{:>6}", fmt_val(&e.key, e.value)), Style::fg(c)),
-            ];
-            if let Some(d) = e.duration_ms {
-                spans.push(ui::span(format!("  after {}", fmt_dur(d)), Style::dim()));
-            }
-            Line::new(spans)
-        })
-        .collect();
+
+    let mut lines = vec![activity_line(st, now, 26), Line::blank()];
+    for e in evs.iter().take(14) {
+        let (glyph, c) = match e.kind {
+            EventKind::Opened => ('▲', level_color(e.level)),
+            EventKind::Escalated => ('▲', Color::RED),
+            EventKind::Persisting => ('■', Color::RED),
+            EventKind::Closed => ('▼', Color::GREEN),
+        };
+        let mut spans = vec![
+            ui::span(format!("{:>8} ", fmt_ago(now, e.at_ms)), Style::dim()),
+            ui::span(format!("{glyph} "), Style::fg(c.clone()).bold()),
+            ui::span(format!("{:<9}", e.kind.label()), Style::fg(c.clone())),
+            ui::span(
+                format!("{:<15}", ui::truncate(&e.metric, 15)),
+                Style::default(),
+            ),
+            ui::span(format!("{:>6}", fmt_val(&e.key, e.value)), Style::fg(c)),
+        ];
+        if let Some(d) = e.duration_ms {
+            spans.push(ui::span(format!("  after {}", fmt_dur(d)), Style::dim()));
+        }
+        lines.push(Line::new(spans));
+    }
     Widget::paragraph(lines).block(block(st, "events"))
 }
 
-// ── incident_context: what was running when it started ────────────────────
+// ── Widget: process context captured at open ──────────────────────────────
 
 fn context(st: &Store) -> Widget {
     if let Some(w) = telemetry_down(st, "incident context") {
@@ -578,8 +874,6 @@ fn context(st: &Store) -> Widget {
     }
     let now = now_ms();
     let eng = &st.watcher.engine;
-    // Prefer the worst active incident; fall back to the most recent closed
-    // one so the panel stays useful after recovery.
     let target = eng
         .active()
         .max_by(|a, b| a.level.cmp(&b.level).then(b.opened_ms.cmp(&a.opened_ms)))
@@ -591,7 +885,7 @@ fn context(st: &Store) -> Widget {
                 Line::text("no incident to correlate", Style::dim()),
                 Line::blank(),
                 Line::text(
-                    "when one opens, the processes running at that moment are captured here",
+                    "when an incident opens, the processes running at that exact moment are captured and kept with it",
                     Style::dim(),
                 ),
             ],
@@ -605,24 +899,13 @@ fn context(st: &Store) -> Widget {
         Line::new(vec![
             ui::span(
                 format!("{} ", ui::truncate(&i.metric, 18)),
-                Style::fg(c.clone()).bold(),
+                Style::fg(c).bold(),
             ),
             ui::span(i.state.label(), Style::fg(state_color(i.state))),
-        ]),
-        Line::new(vec![
-            ui::span("opened  ", Style::dim()),
-            ui::raw(fmt_ago(now, i.opened_ms)),
-            ui::span("   held ", Style::dim()),
-            ui::raw(fmt_dur(i.duration_ms(i.closed_ms.unwrap_or(now)))),
-        ]),
-        Line::new(vec![
-            ui::span("trigger ", Style::dim()),
-            ui::raw(format!(
-                "≥{}  clear <{}  peak {}",
-                fmt_val(&i.key, i.threshold),
-                fmt_val(&i.key, i.clear_threshold),
-                fmt_val(&i.key, i.peak)
-            )),
+            ui::span(
+                format!("   opened {}", fmt_ago(now, i.opened_ms)),
+                Style::dim(),
+            ),
         ]),
         Line::blank(),
     ];
@@ -632,37 +915,148 @@ fn context(st: &Store) -> Widget {
             "process telemetry was unavailable when this opened",
             Style::fg(Color::YELLOW),
         ));
+        lines.push(Line::text(
+            "no context is shown rather than a misleading later snapshot",
+            Style::dim(),
+        ));
     } else if i.context.is_empty() {
         lines.push(Line::text("no processes captured", Style::dim()));
     } else {
-        lines.push(Line::text("running when it started", Style::dim()));
-        let mut t = ui::Table::new(&[
-            ("pid", 7, true),
-            ("process", 14, false),
-            ("cpu%", 7, true),
-            ("rss", 6, true),
-        ]);
-        for p in &i.context {
-            t.row(vec![
-                (p.pid.to_string(), Style::dim()),
-                (p.name.clone(), Style::default()),
-                (
-                    format!("{:.1}", p.cpu_pct),
-                    Style::fg(Color::usage(p.cpu_pct.min(100.0))),
-                ),
-                (ui::fmt_bytes(p.mem_kb * 1024), Style::dim()),
-            ]);
-        }
-        lines.extend(t.lines());
-        lines.push(Line::blank());
-        // Correlation, not causation — say so plainly.
         lines.push(Line::text(
-            "correlated by time, not a proven cause",
+            "processes at the moment it opened",
+            Style::dim(),
+        ));
+        // Ranked by CPU: the metric most incidents correlate with, and the
+        // ranking makes the distribution obvious without a table scan.
+        let entries: Vec<(String, f64, String)> = i
+            .context
+            .iter()
+            .map(|p| {
+                (
+                    format!("{} {}", p.pid, ui::truncate(&p.name, 12)),
+                    p.cpu_pct,
+                    format!("{:>6.1}%  {:>6}", p.cpu_pct, ui::fmt_bytes(p.mem_kb * 1024)),
+                )
+            })
+            .collect();
+        lines.extend(viz::ranking_bars(&entries, 19, 12, Color::MAGENTA));
+        lines.push(Line::blank());
+        lines.push(Line::text(
+            "present at the time — correlation, not a proven cause",
             Style::dim(),
         ));
     }
 
-    Widget::paragraph(lines).block(block(st, "incident context"))
+    Widget::Paragraph {
+        lines,
+        block: Some(block(st, "incident context")),
+        wrap: true,
+    }
+}
+
+// ── Widget: monitoring coverage ───────────────────────────────────────────
+
+/// What Sentinel can actually see, and what it cannot.
+///
+/// Deliberately prominent: an incident detector that silently monitors less
+/// than the user assumes is worse than one that monitors nothing.
+fn coverage(st: &Store) -> Widget {
+    let now = now_ms();
+    let stale = st.watcher.last_sample_ms > 0
+        && now.saturating_sub(st.watcher.last_sample_ms) > STALE_AFTER_MS;
+
+    let sample = Sample {
+        cpu: st.cpu.as_ref(),
+        memory: st.memory.as_ref(),
+        disk: st.disk.as_ref(),
+        processes: None,
+    };
+    let live = watch::measured(&sample);
+
+    let mut lines = vec![Line::new(vec![
+        ui::span(
+            if live.is_empty() {
+                "○ NO TELEMETRY"
+            } else if stale {
+                "◐ STALE"
+            } else {
+                "● MONITORING"
+            },
+            Style::fg(if live.is_empty() {
+                Color::RED
+            } else if stale {
+                Color::YELLOW
+            } else {
+                Color::GREEN
+            })
+            .bold(),
+        ),
+        ui::span(
+            format!("   {} conditions   1s interval", live.len()),
+            Style::dim(),
+        ),
+    ])];
+
+    if stale {
+        lines.push(Line::text(
+            format!("last sample {}", fmt_ago(now, st.watcher.last_sample_ms)),
+            Style::fg(Color::YELLOW),
+        ));
+    }
+    lines.push(Line::blank());
+
+    // Watched conditions with their current value and trigger.
+    for (key, value) in live.iter().take(10) {
+        let (trigger, _clear) = watch::thresholds_for(key);
+        let breaching = *value >= trigger;
+        // Tracked-but-not-breaching means it is inside the hysteresis band,
+        // on its way back down — distinct from both healthy and breaching.
+        let tracked = st.watcher.engine.by_key(key).is_some();
+        let (glyph, col) = if breaching {
+            ('▲', Color::RED)
+        } else if tracked {
+            ('◐', Color::YELLOW)
+        } else if *value >= trigger * 0.8 {
+            ('●', Color::YELLOW)
+        } else {
+            ('●', Color::GREEN)
+        };
+        lines.push(Line::new(vec![
+            ui::span(format!("{glyph} "), Style::fg(col.clone())),
+            ui::span(
+                format!("{:<10}", ui::truncate(&watch::label_for(key), 10)),
+                Style::default(),
+            ),
+            ui::span(format!("{:>7}", fmt_val(key, *value)), Style::fg(col)),
+            ui::span(
+                format!("  trigger ≥{}", fmt_val(key, trigger)),
+                Style::dim(),
+            ),
+        ]));
+    }
+
+    // The honest part: what the host cannot give us.
+    if let Some(caps) = &st.caps {
+        if !caps.unavailable.is_empty() {
+            lines.push(Line::blank());
+            lines.push(Line::text(
+                "not monitored — host does not collect",
+                Style::dim(),
+            ));
+            for g in caps.unavailable.iter().take(6) {
+                lines.push(Line::new(vec![
+                    ui::span("○ ", Style::dim()),
+                    ui::span(format!("{:<22}", ui::truncate(&g.topic, 22)), Style::dim()),
+                ]));
+            }
+        }
+    }
+
+    Widget::Paragraph {
+        lines,
+        block: Some(block(st, "coverage")),
+        wrap: true,
+    }
 }
 
 #[cfg(test)]

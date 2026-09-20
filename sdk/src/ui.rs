@@ -69,7 +69,7 @@ impl Serialize for Color {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct Style {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fg: Option<Color>,
