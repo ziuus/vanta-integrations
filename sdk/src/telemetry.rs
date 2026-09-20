@@ -380,3 +380,28 @@ mod tests {
         assert_eq!(c.reason("cpu"), None);
     }
 }
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ProcessTreeSnapshot {
+    pub total: usize,
+    pub processes: Vec<ProcessTreeNode>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ProcessTreeNode {
+    pub pid: u32,
+    pub ppid: u32,
+    pub name: String,
+    #[serde(default, rename = "command")]
+    pub cmdline: String,
+    #[serde(default)]
+    pub state: String,
+    #[serde(default)]
+    pub threads: u32,
+    #[serde(default)]
+    pub uid: u32,
+}
+
+pub fn process_tree() -> Result<ProcessTreeSnapshot> {
+    query(r#"{"topic":"process_tree"}"#)
+}
