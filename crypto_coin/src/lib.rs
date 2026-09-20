@@ -51,7 +51,10 @@ fn emblem_map(u: f32, v: f32) -> (bool, bool) {
         || ((v - (-0.50)).abs() <= 0.06 && u >= -0.20 && u <= 0.12)
         || ((v - 0.50).abs() <= 0.06 && u >= -0.20 && u <= 0.15);
 
-    (in_stem || in_prongs || in_top_loop || in_bot_loop || in_bars, is_border)
+    (
+        in_stem || in_prongs || in_top_loop || in_bot_loop || in_bars,
+        is_border,
+    )
 }
 
 fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Value> {
@@ -130,7 +133,9 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
                 let (rnx, rny, rnz) = rotate(nx / n_len, ny / n_len, nz / n_len);
 
                 let z_depth = k2 + rz;
-                if z_depth <= 0.1 { continue; }
+                if z_depth <= 0.1 {
+                    continue;
+                }
                 let ooz = 1.0 / z_depth;
 
                 let xp = (width as f32 / 2.0 + scale * ooz * rx) as i32;
@@ -143,14 +148,17 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
                     let hy = ly;
                     let hz = lz + vz;
                     let h_len = (hx * hx + hy * hy + hz * hz).sqrt().max(0.001);
-                    let spec = (-(rnx * (hx / h_len) + rny * (hy / h_len) + rnz * (hz / h_len))).max(0.0).powi(8);
+                    let spec = (-(rnx * (hx / h_len) + rny * (hy / h_len) + rnz * (hz / h_len)))
+                        .max(0.0)
+                        .powi(8);
 
                     let lum = (0.20 + 0.65 * diff + bump).clamp(0.0, 1.0);
 
                     if ooz > z_buffer[idx] {
                         z_buffer[idx] = ooz;
                         let char_idx = (lum * ramp_len as f32) as usize;
-                        b_buffer[idx] = ramp.chars().nth(char_idx.clamp(0, ramp_len)).unwrap_or('█');
+                        b_buffer[idx] =
+                            ramp.chars().nth(char_idx.clamp(0, ramp_len)).unwrap_or('█');
                         c_buffer[idx] = if spec > 0.4 {
                             "#fffbeb" // Bright gold/white specular
                         } else if lum > 0.6 {
@@ -181,7 +189,9 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
             let (rnx, rny, rnz) = rotate(nx / n_len, ny / n_len, 0.0);
 
             let z_depth = k2 + rz;
-            if z_depth <= 0.1 { continue; }
+            if z_depth <= 0.1 {
+                continue;
+            }
             let ooz = 1.0 / z_depth;
 
             let xp = (width as f32 / 2.0 + scale * ooz * rx) as i32;

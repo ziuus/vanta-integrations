@@ -1,0 +1,15 @@
+[package]
+name = "system-observatory"
+version = "0.1.0"
+edition = "2021"
+description = "Unified system control room for Vanta: resources, trends and health"
+license = "MIT"
+
+[lib]
+name = "system_observatory"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+extism-pdk = "1.4"
+serde_json = "1.0"
+vanta-ext-sdk = { path = "../sdk" }

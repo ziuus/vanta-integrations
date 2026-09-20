@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "sdk",
+    "system_observatory",
     "crypto_coin",
     "security",
 ]
