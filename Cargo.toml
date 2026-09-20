@@ -6,6 +6,8 @@ members = [
     "portwatch",
     "crypto_coin",
     "security", "netscope",
-    "proctrace", "proctrace",
+    "proctrace",
+    "servicewatch", "proctrace",
+    "servicewatch", "servicewatch",
 ]
 resolver = "2"

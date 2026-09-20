@@ -405,3 +405,23 @@ pub struct ProcessTreeNode {
 pub fn process_tree() -> Result<ProcessTreeSnapshot> {
     query(r#"{"topic":"process_tree"}"#)
 }
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ServicesSnapshot {
+    pub total: usize,
+    pub services: Vec<ServiceNode>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ServiceNode {
+    pub name: String,
+    pub load_state: String,
+    pub active_state: String,
+    pub sub_state: String,
+    pub pid: u32,
+    pub start_ts: u64,
+}
+
+pub fn services() -> Result<ServicesSnapshot> {
+    query(r#"{"topic":"services"}"#)
+}
