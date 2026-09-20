@@ -260,98 +260,229 @@ sha256 was verified against its committed artifact.
 
 ## 4. Remaining Work
 
+Superseded by the capability audit in **§6**. Kept short here; §6.5 is the
+authoritative roadmap.
+
 - [x] **M1** Host `vanta_query` telemetry API + docs.
 - [x] **M2** `vanta-ext-sdk` — telemetry client, history, UI primitives.
-- [x] **M3** `system_observatory` — first real-telemetry extension, proven
-      end-to-end (build → artifact → registry → live render in Vanta).
-- [ ] **M4** `process_explorer`. Host already serves pid/ppid/cpu/rss/state/
-      threads/uid/io, so `process_tree`, `process_cpu`, `process_memory`,
-      `process_io`, `process_top` are all buildable today. Note: WASM widgets
-      receive **no key events**, so sorting/filtering cannot be interactive —
-      expose sort order via `[extensions.process_explorer]` config instead...
-      except config is not passed to plugins either (§1.3), so the first
-      version must ship fixed, sensible orderings per widget.
-- [ ] **M5** `network_command`. Only aggregate rx/tx exists. `interface_status`,
-      `connection_table` and `network_topology` need host collectors that do
-      not exist — either add them to the host first or ship the extension with
-      explicit unavailable panels. Do **not** fabricate interfaces.
-- [ ] **M6** `event_stream`. No host event source exists. Designing it means
-      first deciding where events come from (host collector vs. derived from
-      telemetry transitions in the plugin). Deriving from telemetry deltas is
-      honest and needs no host change — prefer that for v1.
-- [ ] **M7** `container_fleet`, `developer_workspace` — both require new host
-      collectors (container runtime, git). Scope only after M4/M5.
-- [ ] Improve `security` (still mock; needs a real CVE source, which needs
-      host network access — currently impossible) and `crypto_coin` (market
-      data likewise needs network).
-- [ ] Optional: fix 24 pre-existing clippy lints in `crypto_coin` (see §5).
+- [x] **M3** `system_observatory` built and proven end-to-end — then **found to
+      duplicate native Vanta** (§6.4). To be reworked, not shipped.
+- [ ] **C0** Rework: strip the four duplicate widgets, keep `health.rs` +
+      `state.rs`, drop the registry entry and artifact.
+- [ ] **C1** `sentinel` — thresholds, sustained breaches, incident timeline,
+      correlation. Buildable today; absorbs `event_stream`.
+- [ ] **C2** Host collectors (connections → git → containers → security
+      posture → per-interface → exec events), each unlocking one extension.
+- [ ] **C3** `security` honesty fix (mock CVEs currently labelled "Live").
+- [ ] Optional: 24 pre-existing `crypto_coin` clippy lints (§3).
+- [ ] **Rejected, do not build**: `process_explorer`, `resource_timeline`,
+      `resource_flow`, `load_history`, `traffic_graph`, `network_radar`,
+      `network_topology`, `build_status`, `workspace_stats`, `dev_events`.
+
+---
+
+## 6. Capability-Gap Audit (supersedes the widget-driven roadmap)
+
+The roadmap was originally a **list of widgets**. That produced
+`system_observatory`, which on inspection is largely a re-skin of what Vanta
+already ships. This section re-derives the roadmap from *capabilities* and
+records what is rejected and why, so the mistake is not repeated.
+
+### 6.1 Two rejection tests
+
+Every proposed extension must pass both:
+
+1. **Native test** — "could the user already get this from native Vanta?"
+   If yes, reject. A different layout, colour or data path is not a capability.
+2. **Custom-widget test** — "could the user already get this from a
+   `[[custom_widgets]]` entry?" The host ships a user-facing escape hatch:
+   `source = command|file` + `renderer = value|text|gauge|bar|graph`
+   (`src/custom/`). Anything that is *one scalar or one blob of text from one
+   command* is already possible without an extension. An extension only earns
+   its place when it needs **logic**: state over time, cross-metric
+   correlation, structure, or a workflow.
+
+### 6.2 What native Vanta already provides (verified in source)
+
+* **Dashboard**: `system` (distro logo + os/host/kernel/uptime/shell/term/cpu/
+  gpu/memory/battery), `gauges` (cpu/mem/bat rings), `cpu` (history graph +
+  per-core meters), `memory` (RAM+SWAP meters and graph), `storage` (per-mount
+  capacity bars), `network` (rx/tx rate graphs, peak, totals), `gpu`,
+  `status` (wifi ssid+signal, ip, package count + pending updates, **docker
+  running/total**, load 1/5/15 + core count, process count, battery with
+  watts/ETA, per-sensor temps), `clock`, `calendar`, `weather`, `media`,
+  `visualizer`, top-processes preview.
+* **Monitor**: large cpu graph + per-core, memory, per-mount disk **I/O**
+  graphs + capacity, network rx/tx, gpu, system facts, and a full process
+  table — `pid, name, cpu%, MEM%, RSS, state, user, THR, r/s, w/s, COMMAND`
+  with select, `/` search, `s` sort field, `r` reverse, `t` tree + `←→` fold,
+  `c` command toggle, `k`/`K` SIGTERM/SIGKILL with two-step confirm, plus a
+  detail strip (ppid, full cmdline, io).
+* **Aesthetic**: block clock, calendar, matrix rain, 3D donut, visualizer,
+  pinned media image.
+* **Workspace**: agenda (ICS), tasks (interactive toggle/edit), obsidian vault
+  browser with note preview, RSS news, yazi-style file manager with preview.
+* **Cross-cutting**: 8 themes, settings overlay, debug log page, custom
+  widgets, extension loading.
+
+**Not present anywhere in native Vanta:** any notion of a **threshold, alert,
+verdict, incident or event log**; any **history that outlives the process**;
+any **per-interface** network data; any **socket/connection** table; any
+**per-container** detail (only a count); any **git/project** awareness.
+
+### 6.3 Capability matrix
+
+| Capability | Native Vanta | Existing extension | Proposed | Actual gap | Decision |
+|---|---|---|---|---|---|
+| cpu/mem/disk/net values + trends | Dashboard + Monitor graphs | `system_observatory` (dup) | `system_observatory`, `resource_timeline`, `resource_flow` | **none** | **REMOVE** |
+| load average | `status` (1/5/15 + cores) | — | `load_history` | trend graph only; marginal | **REMOVE** (fold per-core normalisation into verdict logic) |
+| "is anything wrong?" verdict | **none** — only per-widget colour ramps | `system_health` (new) | `system_health` | **whole capability** | **KEEP → seed of new extension** |
+| sustained breach (x% for N min) | none | none | — | whole capability | **BUILD** |
+| event log / state-change timeline | **none at all** | none | `event_stream`, `event_timeline`, `event_stats` | whole capability | **BUILD — merge `event_stream` here** |
+| incident correlation (what ran during the spike) | none (only top-by-cpu *now*) | none | — | whole capability | **BUILD** |
+| process list/sort/search/tree/kill | Monitor: htop-class table | — | `process_explorer` + 5 widgets | **none** | **REMOVE** |
+| short-lived process / exec lineage | none (snapshot misses processes that die between samples) | none | — | real gap; needs host collector | **DEFER** (host first) |
+| aggregate network rate graphs | Dashboard + Monitor | — | `traffic_graph`, `network_radar` | **none** | **REMOVE** |
+| per-interface counters | none (host sums `/proc/net/dev`) | none | `interface_status` | real gap; needs host topic | **DEFER** (host first) |
+| socket/connection table + process attribution | none | none | `connection_table` | real gap; **highest-value network work** | **DEFER** (host first) |
+| network topology | none | none | `network_topology` | no data source exists on the machine | **REJECT** — cannot be built honestly |
+| container count | `status`: `docker N/M` | — | `container_status` | count only | partial |
+| per-container resources / logs / images / restarts | none | none | `container_*` | real gap; must beat a `docker ps` custom widget | **DEFER** (host first) |
+| git / project intelligence | **none** | none | `developer_workspace`, `git_activity`, `project_status` | whole capability | **DEFER** (host first) — genuinely additive |
+| build/test status | none | none | `build_status` | would require executing builds | **REJECT** unless the host grows a collector |
+| notes / tasks / agenda / news / files | Workspace page | — | `workspace_stats`, `dev_events` | mostly covered | **REMOVE** overlap |
+| CVE / threat feed | none | **`security` (MOCK)** | `security_events/alerts/cves` | needs network, which plugins do not have | **FIX HONESTY NOW**; real version blocked |
+| local security posture (listening ports, failed logins, pending security updates) | pkgs+updates count | none | `security_summary` | real gap; needs host topics | **DEFER** (host first) — the honest security capability |
+| market / crypto data | none | `crypto_coin` (pure math, claims nothing) | `crypto_chart`, `market_ticker` | needs network | keep coin as **aesthetic**; reject data widgets for now |
+| one scalar/text from a command or file | **`custom_widgets`** | — | many | **none** | raises the bar for every extension |
+
+### 6.4 Verdict on `system_observatory`
+
+It **substantially duplicates native Vanta** and must not ship as-is.
+Four of its five widgets (`system_observatory`, `resource_timeline`,
+`resource_flow`, `load_history`) restate the Dashboard and Monitor pages.
+
+Reusable, do **not** rewrite:
+* `system_observatory/src/health.rs` — threshold rules, `Level`, `Finding`,
+  per-core load normalisation, "missing data is not a finding", 6 unit tests.
+  This is the seed of the one genuinely new capability.
+* `system_observatory/src/state.rs` — the shared-snapshot + short-TTL cache
+  pattern and its rationale (one host query per frame, panels cannot disagree).
+* `vanta-ext-sdk` in full — telemetry client, bounded history, UI primitives.
+
+Discard: the four duplicate widget renderers in `lib.rs`, plus the registry
+entry and artifact (never pushed, so no user is affected).
+
+### 6.5 Resulting capability-driven roadmap
+
+**C1 — `sentinel`: threshold watching, incidents and event correlation.**
+The only genuinely additive capability that is buildable **today** with the
+existing telemetry API. Native Vanta tells you what is happening *now*;
+`sentinel` tells you *what changed, when, for how long, and what was running
+at the time*. Absorbs the roadmap's `event_stream`/`event_timeline`/
+`event_stats`. Needs no host change. Passes both rejection tests: stateful,
+cross-metric, time-correlated logic that neither a native widget nor a
+command-based custom widget can express.
+
+**C2 — host collectors, in value order.** Each unlocks one extension that is
+otherwise impossible to build honestly:
+1. `network.connections` (+ process attribution) → connection/flow diagnostics
+2. `git` (repo state for a configured path) → developer/project intelligence
+3. `containers` (per-container detail via docker/podman) → container operations
+4. `security.posture` (listening ports, failed logins, pending security
+   updates) → security investigation
+5. `network.interfaces` (per-interface counters) → completes #1
+6. `process.events` (exec/exit) → short-lived process capture
+
+**C3 — honesty fixes.** `security` presents fabricated CVEs under the title
+"Live CVE Feed". That is the exact failure mode these rules exist to prevent
+and it ships in the registry today. Either relabel it unmistakably as a demo
+or remove the widget until a real source exists.
+
+**Explicitly rejected** (do not revisit without new evidence): duplicate
+resource dashboards, duplicate process lists, duplicate network graphs,
+`network_topology`, `build_status`, generic "system health page" framings.
 
 ---
 
 ## Resume Point
 
 **Last completed:**
-M3 — `system_observatory`, the first extension running on real host telemetry,
-proven end-to-end: built for `wasm32-wasip1`, copied into
-`~/.config/vanta/extensions/`, enabled in `config.toml`, and rendered in a
-live Vanta session with its numbers matching the native panels (load
-`3.33 3.84 3.24`, disk 88%). Artifact committed and registry entry carries its
-real sha256. Also M1 (host `vanta_query`) and M2 (`vanta-ext-sdk`).
+Capability-gap audit (§6). Verified native Vanta in source, then rejected the
+widget-driven roadmap and re-derived it from capabilities. Conclusion:
+`system_observatory` duplicates native monitoring in 4 of 5 widgets and must
+not ship as built; its `health.rs` is the seed of the one capability Vanta
+genuinely lacks.
 
-Commits — host (`../vanta`): `92d5fbc` telemetry API, `41482e5` rounded
-borders. Integrations: `de3e716` audit, `8eff279` sdk, `96698a1`
-system_observatory.
+Earlier in the session: M1 host telemetry API (`vanta` `92d5fbc`), rounded
+borders (`vanta` `41482e5`), M2 SDK (`8eff279`), M3 system_observatory
+(`96698a1`), docs (`46d440d`).
+
+**Nothing is pushed.** Integrations is 4 commits ahead of origin, host 2.
+So the published-but-duplicate `system_observatory` registry entry has never
+been installable by a user — it can be removed cleanly.
 
 **Currently working on:**
-Nothing in flight. The tree is clean and validated in both repos.
+Nothing in flight. Both trees clean and validated.
 
-**Next action:**
-M4 `process_explorer`. All required data already exists in the
-`{"topic":"processes","limit":N}` response (pid, ppid, name, cmdline, cpu_pct,
-mem_kb, state, threads, uid, read_bps, write_bps) — no host change needed.
-Suggested widgets: `process_explorer` (overview + top table), `process_tree`
-(build the hierarchy from ppid; note the host returns only the top N by CPU,
-so parents may be missing — render orphans at root rather than dropping them),
-`process_cpu`, `process_memory`, `process_io`, `process_activity`.
-Copy the shape of `system_observatory`: a `state.rs` with a short-TTL shared
-snapshot, pure logic in its own module with unit tests, widgets in `lib.rs`.
-Reuse `vanta_ext_sdk::ui::Table` — it already pads and clips per column.
+**Next action — C0 then C1 (do NOT build `process_explorer`):**
 
-**Files to create:**
-- `process_explorer/{Cargo.toml,README.md}`
-- `process_explorer/src/{lib.rs,state.rs,tree.rs}`
-- add to workspace `members`, then artifact + `registry.json` entry.
+C0, rework in place:
+1. `git rm artifacts/system_observatory.wasm`, remove its `registry.json`
+   entry (keep `security` and `crypto_coin` entries and hashes untouched).
+2. Rename the crate directory to `sentinel/` and the extension id to
+   `sentinel`; keep `health.rs` and `state.rs` (they carry the reusable
+   rules and the shared-snapshot pattern).
+3. Delete the duplicate widget builders from `lib.rs`: `observatory`,
+   `timeline`, `flow`, `load_history`. Keep `health_panel` as the basis of
+   the verdict widget.
+
+C1, the new capability — `sentinel`:
+* Widgets: `sentinel` (current verdict + active incidents), `incidents`
+  (timeline of opened/closed breaches with duration), `events` (state-change
+  feed), `incident_detail` (the correlation view: what was running when it
+  started).
+* Logic to add on top of `health.rs`: a `Finding` becomes an **incident** only
+  after the breach is sustained for N consecutive samples (debounce, so a
+  one-frame spike is not an alert); incidents open, persist and close with a
+  duration; each transition emits an event; on open, snapshot the top
+  processes from telemetry and keep them with the incident — that is the
+  correlation native Vanta cannot give.
+* Constraints already known: no host config reaches plugins (§1.3), so
+  thresholds ship as sensible constants; history is bounded and dies with the
+  process (no persistence — document it, do not fake durability); events must
+  be a fixed-capacity ring (§1.9).
+
+**Files to touch (C0/C1):**
+- `system_observatory/` → `sentinel/` (`Cargo.toml`, `src/lib.rs`,
+  `src/state.rs`, `src/health.rs`, new `src/incident.rs`, `README.md`)
+- `Cargo.toml` workspace members, `registry.json`, `artifacts/`
+- this document
 
 **Known issues:**
-- `cargo clippy --workspace -- -D warnings` fails on **24 pre-existing lints in
-  `crypto_coin`** only. Validate new crates with `-p <crate>`; see §3 for why
-  they were not fixed in isolation.
-- Host `cargo run --release --example ...` OOMs (LTO). Use the debug profile.
-- `rustup target add wasm32-wasip1` reports a component conflict; the target is
-  installed and builds fine. Ignore.
+- `cargo clippy --workspace -- -D warnings` fails on 24 pre-existing
+  `crypto_coin` lints only; validate new crates with `-p <crate>` (§3).
+- Host `cargo run --release --example ...` OOMs (LTO); use debug.
+- `rustup target add wasm32-wasip1` reports a conflict but the target works.
 
-**Validation status (all re-run at the end of this session):**
-- `cargo test -p vanta-ext-sdk` — 18 passed
-- `cargo test -p system-observatory` — 8 passed
-- `cargo clippy -p vanta-ext-sdk -p system-observatory --all-targets -D warnings` — clean
-- `cargo fmt --all -- --check` — clean
-- `cargo build --target wasm32-wasip1 --release` — all crates build
+**Validation status (end of session, both repos clean):**
+- `cargo test -p vanta-ext-sdk` 18 passed; `-p system-observatory` 8 passed
+- clippy clean on both new crates; `cargo fmt --all -- --check` clean
+- `cargo build --target wasm32-wasip1 --release` all crates build
 - registry sha256 verified against all three committed artifacts
-- host `cargo test` — 88 passed; host builds in release
-- live render in Vanta confirmed on the Dashboard page
+- host: 88 tests, release build, live render confirmed in a real session
 
 **Do not redo:**
-- The capability probe (§1.3). Definitive: no FS, no network, no env, no
-  config inside plugins. Telemetry comes only from `vanta_query`.
-- The host telemetry API. It works; add topics to it rather than replacing it.
-- The shared-snapshot pattern and SDK primitives (sparkline, braille, table,
-  meters, bounded history) — reuse them, do not reimplement per extension.
-- Do not fix `crypto_coin` lints without rebuilding and republishing its
-  artifact and sha256 in the same commit.
-- Do not build roadmap extensions on mock data.
+- The capability probe (§1.3) or the capability audit (§6).
+- The host telemetry API — extend it with topics, do not replace it.
+- The SDK primitives and the shared-snapshot pattern — reuse them.
+- Do **not** build another resource dashboard, process list or network graph;
+  §6.3 records the rejections and the reasoning.
+- Do not fix `crypto_coin` lints without rebuilding/republishing its artifact
+  and sha256 in the same commit.
 
-**User's environment left untouched:**
-`~/.config/vanta/config.toml` was temporarily modified for the live test and
-**restored** from `/tmp/vanta-cfg.bak`; `enabled = ["crypto_coin"]` and the
-original layout are back. `system_observatory.wasm` remains installed in
-`~/.config/vanta/extensions/` but is not enabled, so it does not load.
+**User's environment:**
+`~/.config/vanta/config.toml` was restored after the live test
+(`enabled = ["crypto_coin"]`, original layout). A stale
+`system_observatory.wasm` remains in `~/.config/vanta/extensions/` but is not
+enabled; delete it during C0.
