@@ -278,6 +278,63 @@ pub fn io(limit: usize) -> Result<IoSnapshot> {
     query(&format!(r#"{{"topic":"io","limit":{limit}}}"#))
 }
 
+// ── connections topic ─────────────────────────────────────────────────────────
+
+/// One TCP or TCP6 socket entry from the `connections` topic.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct ConnectionEntry {
+    /// `"tcp"` or `"tcp6"`.
+    pub protocol: String,
+    /// Human-readable `"host:port"` or `"[addr]:port"`.
+    pub local_addr: String,
+    pub remote_addr: String,
+    /// Kernel state string: `"LISTEN"`, `"ESTABLISHED"`, `"TIME_WAIT"`, etc.
+    pub state: String,
+    /// PID of the owning process, if attributable by the host.
+    pub pid: Option<u32>,
+    /// Short process name from `/proc/<pid>/comm`, if attributable.
+    pub process_name: Option<String>,
+}
+
+impl ConnectionEntry {
+    /// Parse the port number from the local address (`"host:PORT"`).
+    pub fn local_port(&self) -> Option<u16> {
+        self.local_addr.rsplit(':').next()?.parse().ok()
+    }
+
+    /// True if the local address is loopback-only (127.x or [::1]).
+    pub fn is_localhost_only(&self) -> bool {
+        self.local_addr.starts_with("127.")
+            || self.local_addr.starts_with("[::1]")
+            || self.local_addr.starts_with("::1")
+    }
+
+    pub fn is_listen(&self) -> bool {
+        self.state == "LISTEN"
+    }
+}
+
+/// Response shape for `{topic: "connections"}`.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct ConnectionsSnapshot {
+    pub total: usize,
+    pub established: usize,
+    pub listen: usize,
+    pub time_wait: usize,
+    pub connections: Vec<ConnectionEntry>,
+}
+
+impl ConnectionsSnapshot {
+    pub fn listeners(&self) -> impl Iterator<Item = &ConnectionEntry> {
+        self.connections.iter().filter(|c| c.is_listen())
+    }
+}
+
+/// Full TCP + TCP6 socket table with process attribution.
+pub fn connections() -> Result<ConnectionsSnapshot> {
+    query(r#"{"topic":"connections"}"#)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

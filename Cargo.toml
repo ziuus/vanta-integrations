@@ -3,6 +3,7 @@ members = [
     "sdk",
     "sentinel",
     "iowatch",
+    "portwatch",
     "crypto_coin",
     "security",
 ]

@@ -1,0 +1,15 @@
+[package]
+name = "portwatch"
+version = "0.1.0"
+edition = "2021"
+description = "What network ports is this machine exposing, and which process owns them?"
+license = "MIT"
+
+[lib]
+name = "portwatch"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+extism-pdk = "1.4"
+serde_json = "1.0"
+vanta-ext-sdk = { path = "../sdk" }
