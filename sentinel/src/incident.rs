@@ -126,7 +126,7 @@ impl Incident {
 }
 
 /// Something worth putting on a feed. Emitted only on real transitions.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventKind {
     Opened,
     Escalated,
@@ -243,6 +243,12 @@ impl Engine {
         self.active.iter().find(|i| i.key == key)
     }
 
+    /// Keys of every incident being tracked, including ones still in the
+    /// debounce window. Callers use this to apply hysteresis.
+    pub fn tracked_keys(&self) -> Vec<String> {
+        self.active.iter().map(|i| i.key.clone()).collect()
+    }
+
     fn push_event(&mut self, e: Event) {
         if self.events.len() == MAX_EVENTS {
             self.events.remove(0);
@@ -293,8 +299,7 @@ impl Engine {
                                 transition = Some(EventKind::Opened);
                             }
                             State::Open
-                                if inc.samples
-                                    >= self.cfg.open_after + self.cfg.persist_after =>
+                                if inc.samples >= self.cfg.open_after + self.cfg.persist_after =>
                             {
                                 inc.state = State::Persisting;
                                 transition = Some(EventKind::Persisting);
@@ -508,7 +513,11 @@ mod tests {
         // Recovers before opening: leaves no trace at all.
         recover(&mut e, 2000, 2);
         assert_eq!(e.active_count(), 0);
-        assert_eq!(e.closed().count(), 0, "debounced spike must not be recorded");
+        assert_eq!(
+            e.closed().count(),
+            0,
+            "debounced spike must not be recorded"
+        );
         assert_eq!(e.events().count(), 0);
     }
 
@@ -587,7 +596,11 @@ mod tests {
         for i in 0..5 {
             e.ingest(t + i * 1000, &[obs("cpu", 80.0, Level::Warn)], None);
         }
-        assert_eq!(e.active_count(), 1, "must not flap while in hysteresis band");
+        assert_eq!(
+            e.active_count(),
+            1,
+            "must not flap while in hysteresis band"
+        );
         assert_eq!(
             e.events().filter(|ev| ev.kind == EventKind::Closed).count(),
             0
@@ -721,10 +734,20 @@ mod tests {
             e.ingest(t, &[], None);
             t += 1000;
         }
-        assert_eq!(e.closed().count(), MAX_CLOSED, "closed history must be bounded");
-        assert!(e.events().count() <= MAX_EVENTS, "event feed must be bounded");
+        assert_eq!(
+            e.closed().count(),
+            MAX_CLOSED,
+            "closed history must be bounded"
+        );
+        assert!(
+            e.events().count() <= MAX_EVENTS,
+            "event feed must be bounded"
+        );
         // Newest first, and the oldest were evicted.
-        assert_eq!(e.closed().next().unwrap().key, format!("k{}", MAX_CLOSED + 19));
+        assert_eq!(
+            e.closed().next().unwrap().key,
+            format!("k{}", MAX_CLOSED + 19)
+        );
     }
 
     #[test]
