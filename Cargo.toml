@@ -5,6 +5,6 @@ members = [
     "iowatch",
     "portwatch",
     "crypto_coin",
-    "security",
+    "security", "netscope",
 ]
 resolver = "2"
