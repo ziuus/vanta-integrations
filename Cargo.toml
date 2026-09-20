@@ -1,5 +1,7 @@
 [workspace]
-members = ["crypto_coin",
+members = [
+    "sdk",
+    "crypto_coin",
     "security",
 ]
 resolver = "2"
