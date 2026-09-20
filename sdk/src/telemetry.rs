@@ -233,6 +233,51 @@ pub fn processes(limit: usize) -> Result<Processes> {
     query(&format!(r#"{{"topic":"processes","limit":{limit}}}"#))
 }
 
+// ── v1.1 topics ───────────────────────────────────────────────────────────────
+
+/// One entry from the `io` topic — process-level I/O throughput.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct IoProcess {
+    pub pid: u32,
+    pub name: String,
+    /// Bytes read per second (rolling average from `/proc/<pid>/io`).
+    #[serde(default)]
+    pub read_bps: f64,
+    /// Bytes written per second.
+    #[serde(default)]
+    pub write_bps: f64,
+    /// `read_bps + write_bps`, pre-summed by host.
+    #[serde(default)]
+    pub total_bps: f64,
+    #[serde(default)]
+    pub cpu_pct: f64,
+    #[serde(default)]
+    pub mem_kb: u64,
+}
+
+/// Response shape for `{topic: "io"}`.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct IoSnapshot {
+    /// Total read throughput across all returned processes.
+    #[serde(default)]
+    pub total_read_bps: f64,
+    /// Total write throughput across all returned processes.
+    #[serde(default)]
+    pub total_write_bps: f64,
+    pub processes: Vec<IoProcess>,
+}
+
+impl IoSnapshot {
+    pub fn total_bps(&self) -> f64 {
+        self.total_read_bps + self.total_write_bps
+    }
+}
+
+/// Top processes by I/O throughput. `limit` is clamped host-side to 200.
+pub fn io(limit: usize) -> Result<IoSnapshot> {
+    query(&format!(r#"{{"topic":"io","limit":{limit}}}"#))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
