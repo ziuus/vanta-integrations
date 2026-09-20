@@ -1,12 +1,12 @@
 [package]
-name = "system-observatory"
+name = "sentinel"
 version = "0.1.0"
 edition = "2021"
-description = "Unified system control room for Vanta: resources, trends and health"
+description = "Threshold watching, incident lifecycle and process correlation for Vanta"
 license = "MIT"
 
 [lib]
-name = "system_observatory"
+name = "sentinel"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
