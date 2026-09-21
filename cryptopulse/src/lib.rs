@@ -1,6 +1,5 @@
 use extism_pdk::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use vanta_ext_sdk::{
     telemetry::{query, TelemetryError},
     ui, Block, Color, Line, Span, Style, Widget, API_VERSION_TELEMETRY,
@@ -56,10 +55,8 @@ fn fetch_data() -> Result<CryptoSnapshot, TelemetryError> {
 fn format_price(p: f64) -> String {
     if p < 1.0 {
         format!("{:.4}", p)
-    } else if p < 100.0 {
-        format!("{:.2}", p)
     } else {
-        format!("{:.2}", p) // or add commas
+        format!("{:.2}", p)
     }
 }
 
@@ -238,11 +235,11 @@ fn build_watchlist(_width: u16, height: u16) -> Widget {
         return ui::unavailable("WATCHLIST", "no data");
     };
 
-    let wl = vec!["SOL", "XRP", "ADA", "DOGE", "DOT"];
+    let wl = ["SOL", "XRP", "ADA", "DOGE", "DOT"];
     let mut lines = vec![];
 
     let max = height.saturating_sub(2) as usize;
-    for (i, sym) in wl.iter().enumerate().take(max) {
+    for (_i, sym) in wl.iter().enumerate().take(max) {
         if let Some(a) = snap.assets.iter().find(|x| x.symbol == *sym) {
             let c = if a.change_24h_pct >= 0.0 {
                 Color::GREEN

@@ -160,10 +160,7 @@ pub fn extract_listeners(snap: &ConnectionsSnapshot) -> Vec<Listener> {
         let entry = seen.entry(key).or_insert_with(|| Listener {
             port,
             protocol: "tcp".to_string(),
-            process_name: c
-                .process_name
-                .clone()
-                .unwrap_or_else(|| "?".to_string()),
+            process_name: c.process_name.clone().unwrap_or_else(|| "?".to_string()),
             pid: c.pid,
             exposed,
         });
@@ -182,9 +179,7 @@ pub fn extract_listeners(snap: &ConnectionsSnapshot) -> Vec<Listener> {
 
     let mut list: Vec<Listener> = seen.into_values().collect();
     // Exposed first, then port ascending.
-    list.sort_by(|a, b| {
-        b.exposed.cmp(&a.exposed).then(a.port.cmp(&b.port))
-    });
+    list.sort_by(|a, b| b.exposed.cmp(&a.exposed).then(a.port.cmp(&b.port)));
     list
 }
 
@@ -193,9 +188,7 @@ fn tick() {
 
     // Capabilities check — once only. Use try_borrow so a killed-render can't
     // leave the RefCell poisoned for subsequent calls.
-    let need_caps = STORE.with(|s| {
-        s.try_borrow().map(|st| !st.caps_done).unwrap_or(false)
-    });
+    let need_caps = STORE.with(|s| s.try_borrow().map(|st| !st.caps_done).unwrap_or(false));
     if need_caps {
         let caps = telemetry::capabilities();
         STORE.with(|s| {
@@ -313,8 +306,8 @@ fn loading_widget(title: &str, msg: &str) -> Widget {
 /// Colour for a port number — well-known ports stand out.
 fn port_color(port: u16) -> Color {
     match port {
-        22 | 23 => Color::RED,           // ssh / telnet
-        80 | 443 | 8080 | 8443 => Color::GREEN, // http/https
+        22 | 23 => Color::RED,                            // ssh / telnet
+        80 | 443 | 8080 | 8443 => Color::GREEN,           // http/https
         5432 | 3306 | 27017 | 6379 | 5672 => Color::CYAN, // db/cache
         _ => Color::WHITE,
     }
@@ -334,7 +327,9 @@ fn build_portwatch(w: u16, h: u16) -> Widget {
     tick();
 
     STORE.with(|s| {
-        let Ok(st) = s.try_borrow() else { return error_widget("PORTWATCH", "store busy"); };
+        let Ok(st) = s.try_borrow() else {
+            return error_widget("PORTWATCH", "store busy");
+        };
 
         if let Some(ref e) = st.error {
             return error_widget("PORTWATCH", e);
@@ -369,10 +364,7 @@ fn build_portwatch(w: u16, h: u16) -> Widget {
                 }),
             ),
             ui::span("  ", Style::default()),
-            ui::span(
-                format!("{} ESTABLISHED", snap.established),
-                Style::dim(),
-            ),
+            ui::span(format!("{} ESTABLISHED", snap.established), Style::dim()),
         ]));
         lines.push(sep(w));
 
@@ -410,10 +402,7 @@ fn build_portwatch(w: u16, h: u16) -> Widget {
 
             if st.listeners.len() > table_rows {
                 lines.push(Line::text(
-                    format!(
-                        "  … {} more",
-                        st.listeners.len() - table_rows
-                    ),
+                    format!("  … {} more", st.listeners.len() - table_rows),
                     Style::dim(),
                 ));
             }
@@ -448,10 +437,7 @@ fn build_portwatch(w: u16, h: u16) -> Widget {
                         ),
                         Style::fg(Color::WHITE),
                     ),
-                    ui::span(
-                        format!("  {}", ev.age_str(now)),
-                        Style::dim(),
-                    ),
+                    ui::span(format!("  {}", ev.age_str(now)), Style::dim()),
                 ]));
             }
         } else if st.activity.is_empty() && (h as usize) > lines.len() + 2 {
@@ -470,7 +456,9 @@ fn build_port_listeners(w: u16, h: u16) -> Widget {
     tick();
 
     STORE.with(|s| {
-        let Ok(st) = s.try_borrow() else { return error_widget("PORTWATCH", "store busy"); };
+        let Ok(st) = s.try_borrow() else {
+            return error_widget("PORTWATCH", "store busy");
+        };
 
         if let Some(ref e) = st.error {
             return error_widget("LISTENERS", e);
@@ -527,7 +515,9 @@ fn build_port_activity(w: u16, h: u16) -> Widget {
     tick();
 
     STORE.with(|s| {
-        let Ok(st) = s.try_borrow() else { return error_widget("PORTWATCH", "store busy"); };
+        let Ok(st) = s.try_borrow() else {
+            return error_widget("PORTWATCH", "store busy");
+        };
 
         if let Some(ref e) = st.error {
             return error_widget("PORT ACTIVITY", e);
@@ -652,13 +642,27 @@ mod tests {
 
     #[test]
     fn local_port_ipv4() {
-        let c = conn("tcp", "0.0.0.0:22", "0.0.0.0:0", "LISTEN", Some(812), Some("sshd"));
+        let c = conn(
+            "tcp",
+            "0.0.0.0:22",
+            "0.0.0.0:0",
+            "LISTEN",
+            Some(812),
+            Some("sshd"),
+        );
         assert_eq!(c.local_port(), Some(22));
     }
 
     #[test]
     fn local_port_ipv6() {
-        let c = conn("tcp6", "[::]:8080", "[::]:0", "LISTEN", Some(9000), Some("java"));
+        let c = conn(
+            "tcp6",
+            "[::]:8080",
+            "[::]:0",
+            "LISTEN",
+            Some(9000),
+            Some("java"),
+        );
         assert_eq!(c.local_port(), Some(8080));
     }
 
@@ -670,10 +674,24 @@ mod tests {
 
     #[test]
     fn is_localhost_only_detects_loopback() {
-        let loopback = conn("tcp", "127.0.0.1:5432", "0.0.0.0:0", "LISTEN", Some(1), Some("pg"));
+        let loopback = conn(
+            "tcp",
+            "127.0.0.1:5432",
+            "0.0.0.0:0",
+            "LISTEN",
+            Some(1),
+            Some("pg"),
+        );
         assert!(loopback.is_localhost_only());
 
-        let any = conn("tcp", "0.0.0.0:5432", "0.0.0.0:0", "LISTEN", Some(1), Some("pg"));
+        let any = conn(
+            "tcp",
+            "0.0.0.0:5432",
+            "0.0.0.0:0",
+            "LISTEN",
+            Some(1),
+            Some("pg"),
+        );
         assert!(!any.is_localhost_only());
     }
 
@@ -682,7 +700,14 @@ mod tests {
         let listen = conn("tcp", "0.0.0.0:22", "0.0.0.0:0", "LISTEN", None, None);
         assert!(listen.is_listen());
 
-        let estab = conn("tcp", "192.168.1.1:22", "10.0.0.1:54312", "ESTABLISHED", None, None);
+        let estab = conn(
+            "tcp",
+            "192.168.1.1:22",
+            "10.0.0.1:54312",
+            "ESTABLISHED",
+            None,
+            None,
+        );
         assert!(!estab.is_listen());
     }
 
@@ -691,8 +716,22 @@ mod tests {
     #[test]
     fn extract_listeners_deduplicates_tcp_and_tcp6() {
         let snap = make_snap(vec![
-            conn("tcp",  "0.0.0.0:22", "0.0.0.0:0", "LISTEN", Some(812), Some("sshd")),
-            conn("tcp6", "[::]:22",    "[::]:0",     "LISTEN", Some(812), Some("sshd")),
+            conn(
+                "tcp",
+                "0.0.0.0:22",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(812),
+                Some("sshd"),
+            ),
+            conn(
+                "tcp6",
+                "[::]:22",
+                "[::]:0",
+                "LISTEN",
+                Some(812),
+                Some("sshd"),
+            ),
         ]);
         let listeners = extract_listeners(&snap);
         assert_eq!(listeners.len(), 1, "tcp+tcp6 same port should deduplicate");
@@ -703,8 +742,22 @@ mod tests {
     #[test]
     fn extract_listeners_excludes_established() {
         let snap = make_snap(vec![
-            conn("tcp", "0.0.0.0:22",         "0.0.0.0:0",        "LISTEN",      Some(812),  Some("sshd")),
-            conn("tcp", "192.168.1.1:22",      "10.0.0.1:54312",   "ESTABLISHED", Some(812),  Some("sshd")),
+            conn(
+                "tcp",
+                "0.0.0.0:22",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(812),
+                Some("sshd"),
+            ),
+            conn(
+                "tcp",
+                "192.168.1.1:22",
+                "10.0.0.1:54312",
+                "ESTABLISHED",
+                Some(812),
+                Some("sshd"),
+            ),
         ]);
         let listeners = extract_listeners(&snap);
         assert_eq!(listeners.len(), 1);
@@ -714,9 +767,30 @@ mod tests {
     #[test]
     fn extract_listeners_exposed_before_local() {
         let snap = make_snap(vec![
-            conn("tcp", "127.0.0.1:5432", "0.0.0.0:0", "LISTEN", Some(1921), Some("postgres")),
-            conn("tcp", "0.0.0.0:22",     "0.0.0.0:0", "LISTEN", Some(812),  Some("sshd")),
-            conn("tcp", "127.0.0.1:6379", "0.0.0.0:0", "LISTEN", Some(2034), Some("redis")),
+            conn(
+                "tcp",
+                "127.0.0.1:5432",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(1921),
+                Some("postgres"),
+            ),
+            conn(
+                "tcp",
+                "0.0.0.0:22",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(812),
+                Some("sshd"),
+            ),
+            conn(
+                "tcp",
+                "127.0.0.1:6379",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(2034),
+                Some("redis"),
+            ),
         ]);
         let listeners = extract_listeners(&snap);
         // sshd on 0.0.0.0 should come first (exposed), then local ones.
@@ -731,9 +805,30 @@ mod tests {
     #[test]
     fn extract_listeners_sorted_by_port_within_group() {
         let snap = make_snap(vec![
-            conn("tcp", "0.0.0.0:8080", "0.0.0.0:0", "LISTEN", Some(1), Some("a")),
-            conn("tcp", "0.0.0.0:443",  "0.0.0.0:0", "LISTEN", Some(2), Some("b")),
-            conn("tcp", "0.0.0.0:80",   "0.0.0.0:0", "LISTEN", Some(3), Some("c")),
+            conn(
+                "tcp",
+                "0.0.0.0:8080",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(1),
+                Some("a"),
+            ),
+            conn(
+                "tcp",
+                "0.0.0.0:443",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(2),
+                Some("b"),
+            ),
+            conn(
+                "tcp",
+                "0.0.0.0:80",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(3),
+                Some("c"),
+            ),
         ]);
         let listeners = extract_listeners(&snap);
         let ports: Vec<u16> = listeners.iter().map(|l| l.port).collect();
@@ -744,8 +839,15 @@ mod tests {
     fn extract_listeners_prefers_attributed_name() {
         // tcp6 entry has a name, tcp doesn't — should end up with the name.
         let snap = make_snap(vec![
-            conn("tcp",  "0.0.0.0:3000", "0.0.0.0:0", "LISTEN", None,       None),
-            conn("tcp6", "[::]:3000",    "[::]:0",     "LISTEN", Some(4812), Some("node")),
+            conn("tcp", "0.0.0.0:3000", "0.0.0.0:0", "LISTEN", None, None),
+            conn(
+                "tcp6",
+                "[::]:3000",
+                "[::]:0",
+                "LISTEN",
+                Some(4812),
+                Some("node"),
+            ),
         ]);
         let listeners = extract_listeners(&snap);
         assert_eq!(listeners.len(), 1);
@@ -817,9 +919,30 @@ mod tests {
     #[test]
     fn build_portwatch_with_listeners_serialises() {
         inject(make_snap(vec![
-            conn("tcp", "0.0.0.0:22",   "0.0.0.0:0", "LISTEN", Some(812),  Some("sshd")),
-            conn("tcp", "0.0.0.0:5432", "0.0.0.0:0", "LISTEN", Some(1921), Some("postgres")),
-            conn("tcp", "192.168.1.1:22", "10.0.0.1:54312", "ESTABLISHED", Some(812), Some("sshd")),
+            conn(
+                "tcp",
+                "0.0.0.0:22",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(812),
+                Some("sshd"),
+            ),
+            conn(
+                "tcp",
+                "0.0.0.0:5432",
+                "0.0.0.0:0",
+                "LISTEN",
+                Some(1921),
+                Some("postgres"),
+            ),
+            conn(
+                "tcp",
+                "192.168.1.1:22",
+                "10.0.0.1:54312",
+                "ESTABLISHED",
+                Some(812),
+                Some("sshd"),
+            ),
         ]));
         let w = build_portwatch(80, 24);
         let json = serde_json::to_string(&w).expect("serialises");
@@ -836,9 +959,14 @@ mod tests {
 
     #[test]
     fn build_port_listeners_serialises() {
-        inject(make_snap(vec![
-            conn("tcp", "127.0.0.1:6379", "0.0.0.0:0", "LISTEN", Some(2034), Some("redis")),
-        ]));
+        inject(make_snap(vec![conn(
+            "tcp",
+            "127.0.0.1:6379",
+            "0.0.0.0:0",
+            "LISTEN",
+            Some(2034),
+            Some("redis"),
+        )]));
         let w = build_port_listeners(40, 10);
         let json = serde_json::to_string(&w).expect("serialises");
         assert!(!json.is_empty());

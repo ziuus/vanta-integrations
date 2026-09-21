@@ -37,10 +37,10 @@ struct Store {
 
     connections: Vec<ConnectionEntry>,
     counts: HashMap<String, usize>,
-    
+
     prev_keys: HashSet<ConnKey>,
     activity: Vec<NetEvent>,
-    
+
     error: Option<String>,
 }
 
@@ -111,11 +111,11 @@ fn tick() {
                 Err(e) => st.error = Some(e.to_string()),
                 Ok(snap) => {
                     st.error = None;
-                    
+
                     let mut counts = HashMap::new();
                     let mut new_keys = HashSet::new();
                     let mut valid_conns = Vec::new();
-                    
+
                     for c in snap.connections {
                         let key = ConnKey {
                             protocol: c.protocol.clone(),
@@ -133,7 +133,9 @@ fn tick() {
                             "LISTEN" => 1,
                             _ => 2,
                         };
-                        rank(&a.state).cmp(&rank(&b.state)).then(a.process_name.cmp(&b.process_name))
+                        rank(&a.state)
+                            .cmp(&rank(&b.state))
+                            .then(a.process_name.cmp(&b.process_name))
                     });
 
                     // Detect Opens
@@ -145,7 +147,10 @@ fn tick() {
                         };
                         if !st.prev_keys.contains(&key) && c.state != "LISTEN" {
                             let ev = NetEvent {
-                                process_name: c.process_name.clone().unwrap_or_else(|| "?".to_string()),
+                                process_name: c
+                                    .process_name
+                                    .clone()
+                                    .unwrap_or_else(|| "?".to_string()),
                                 remote_addr: c.remote_addr.clone(),
                                 kind: EventKind::Opened,
                                 ts_ms: now,
@@ -158,12 +163,20 @@ fn tick() {
                     }
 
                     // Detect Closes
-                    let closed_events: Vec<NetEvent> = st.prev_keys.iter()
+                    let closed_events: Vec<NetEvent> = st
+                        .prev_keys
+                        .iter()
                         .filter(|k| !new_keys.contains(*k))
                         .filter(|k| !is_listen(&k.remote_addr))
                         .map(|k| {
-                            let name = st.connections.iter()
-                                .find(|c| c.protocol == k.protocol && c.local_addr == k.local_addr && c.remote_addr == k.remote_addr)
+                            let name = st
+                                .connections
+                                .iter()
+                                .find(|c| {
+                                    c.protocol == k.protocol
+                                        && c.local_addr == k.local_addr
+                                        && c.remote_addr == k.remote_addr
+                                })
                                 .and_then(|c| c.process_name.clone())
                                 .unwrap_or_else(|| "?".to_string());
                             NetEvent {
@@ -174,7 +187,7 @@ fn tick() {
                             }
                         })
                         .collect();
-                        
+
                     for ev in closed_events {
                         if st.activity.len() >= ACTIVITY_RING {
                             st.activity.remove(0);
@@ -208,19 +221,29 @@ fn loading_widget(title: &str, msg: &str) -> Widget {
         .block(Block::titled(format!(" {title} ")))
 }
 
-fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool, show_activity: bool) -> Widget {
+fn build_netscope(
+    width: u16,
+    height: u16,
+    show_table: bool,
+    show_summary: bool,
+    show_activity: bool,
+) -> Widget {
     tick();
 
-    let Ok(st) = STORE.try_with(|s| s.try_borrow().map(|g| (
-        g.error.clone(),
-        g.connections_available,
-        g.connections.clone(),
-        g.counts.clone(),
-        g.activity.clone(),
-    ))) else {
+    let Ok(st) = STORE.try_with(|s| {
+        s.try_borrow().map(|g| {
+            (
+                g.error.clone(),
+                g.connections_available,
+                g.connections.clone(),
+                g.counts.clone(),
+                g.activity.clone(),
+            )
+        })
+    }) else {
         return error_widget("NETSCOPE", "store busy");
     };
-    
+
     let Ok((err, avail, conns, counts, activity)) = st else {
         return error_widget("NETSCOPE", "store busy");
     };
@@ -238,14 +261,21 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
     let mut lines = Vec::new();
 
     if show_table {
-        lines.push(Line::text("PROCESS        LOCAL              REMOTE                 STATE", Style::dim()));
+        lines.push(Line::text(
+            "PROCESS        LOCAL              REMOTE                 STATE",
+            Style::dim(),
+        ));
         lines.push(sep(width));
 
-        let max_rows = if show_activity || show_summary { 10 } else { height.saturating_sub(4) as usize };
-        
+        let max_rows = if show_activity || show_summary {
+            10
+        } else {
+            height.saturating_sub(4) as usize
+        };
+
         for c in conns.iter().take(max_rows.max(1)) {
             let proc_str = c.process_name.as_deref().unwrap_or("?");
-            
+
             let name_col = format!("{:<14}", proc_str.chars().take(13).collect::<String>());
             let local_col = format!("{:<18}", c.local_addr.chars().take(17).collect::<String>());
             let remote_col = format!("{:<22}", c.remote_addr.chars().take(21).collect::<String>());
@@ -261,10 +291,22 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
             };
 
             lines.push(Line::new(vec![
-                Span { content: name_col, style: Some(Style::fg(Color::WHITE).bold()) },
-                Span { content: local_col, style: Some(Style::dim()) },
-                Span { content: remote_col, style: Some(Style::fg(Color::WHITE)) },
-                Span { content: state_col, style: Some(Style::fg(color)) },
+                Span {
+                    content: name_col,
+                    style: Some(Style::fg(Color::WHITE).bold()),
+                },
+                Span {
+                    content: local_col,
+                    style: Some(Style::dim()),
+                },
+                Span {
+                    content: remote_col,
+                    style: Some(Style::fg(Color::WHITE)),
+                },
+                Span {
+                    content: state_col,
+                    style: Some(Style::fg(color)),
+                },
             ]));
         }
     }
@@ -276,7 +318,7 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
         lines.push(Line::text("CONNECTIONS", Style::dim()));
         let mut sorted_counts: Vec<_> = counts.into_iter().collect();
         sorted_counts.sort_by_key(|a| std::cmp::Reverse(a.1));
-        
+
         for (state, count) in sorted_counts {
             let state_str = format_state(&state);
             let color = match state_str {
@@ -285,8 +327,14 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
                 _ => Color::DARK_GRAY,
             };
             lines.push(Line::new(vec![
-                Span { content: format!("{:<13}", state_str), style: Some(Style::fg(color)) },
-                Span { content: format!("{}", count), style: Some(Style::fg(Color::WHITE).bold()) },
+                Span {
+                    content: format!("{:<13}", state_str),
+                    style: Some(Style::fg(color)),
+                },
+                Span {
+                    content: format!("{}", count),
+                    style: Some(Style::fg(Color::WHITE).bold()),
+                },
             ]));
         }
     }
@@ -296,23 +344,53 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
             lines.push(Line::blank());
         }
         lines.push(Line::text("ACTIVITY", Style::dim()));
-        
+
         let now = now_ms();
-        let max_act = if show_table || show_summary { 6 } else { height.saturating_sub(4) as usize };
-        
+        let max_act = if show_table || show_summary {
+            6
+        } else {
+            height.saturating_sub(4) as usize
+        };
+
         for ev in activity.iter().rev().take(max_act.max(1)) {
-            let sign = if ev.kind == EventKind::Opened { "+" } else { "-" };
-            let sign_color = if ev.kind == EventKind::Opened { Color::GREEN } else { Color::RED };
+            let sign = if ev.kind == EventKind::Opened {
+                "+"
+            } else {
+                "-"
+            };
+            let sign_color = if ev.kind == EventKind::Opened {
+                Color::GREEN
+            } else {
+                Color::RED
+            };
             let proc_str = format!("{:<6}", ev.process_name.chars().take(5).collect::<String>());
-            let remote_str = format!("{:<21}", ev.remote_addr.chars().take(20).collect::<String>());
+            let remote_str = format!(
+                "{:<21}",
+                ev.remote_addr.chars().take(20).collect::<String>()
+            );
             let age_str = format_age(now.saturating_sub(ev.ts_ms));
-            
+
             lines.push(Line::new(vec![
-                Span { content: format!("{} ", sign), style: Some(Style::fg(sign_color).bold()) },
-                Span { content: proc_str, style: Some(Style::fg(Color::WHITE).bold()) },
-                Span { content: " → ".into(), style: Some(Style::dim()) },
-                Span { content: remote_str, style: Some(Style::fg(Color::WHITE)) },
-                Span { content: format!("{:>4}", age_str), style: Some(Style::dim()) },
+                Span {
+                    content: format!("{} ", sign),
+                    style: Some(Style::fg(sign_color).bold()),
+                },
+                Span {
+                    content: proc_str,
+                    style: Some(Style::fg(Color::WHITE).bold()),
+                },
+                Span {
+                    content: " → ".into(),
+                    style: Some(Style::dim()),
+                },
+                Span {
+                    content: remote_str,
+                    style: Some(Style::fg(Color::WHITE)),
+                },
+                Span {
+                    content: format!("{:>4}", age_str),
+                    style: Some(Style::dim()),
+                },
             ]));
         }
     }
@@ -332,7 +410,12 @@ fn build_netscope(width: u16, height: u16, show_table: bool, show_summary: bool,
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["netscope", "netscope_table", "netscope_activity", "netscope_summary"]);
+    let ids = serde_json::json!([
+        "netscope",
+        "netscope_table",
+        "netscope_activity",
+        "netscope_summary"
+    ]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 

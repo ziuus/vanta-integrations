@@ -330,10 +330,7 @@ fn build_iowatch(w: u16, h: u16) -> Widget {
 
             // ── Totals row ───────────────────────────────────────────────────
             lines.push(Line::new(vec![
-                ui::span(
-                    format!("{:<14}", "TOTAL"),
-                    Style::default().bold(),
-                ),
+                ui::span(format!("{:<14}", "TOTAL"), Style::default().bold()),
                 ui::span(" ", Style::default()),
                 ui::span(
                     format!("{:>9}", fmt_rate(snap.total_read_bps)),
@@ -395,8 +392,7 @@ fn build_iowatch(w: u16, h: u16) -> Widget {
             }
         }
 
-        Widget::paragraph(lines)
-            .block(Block::titled(" IOWATCH ".to_string()))
+        Widget::paragraph(lines).block(Block::titled(" IOWATCH ".to_string()))
     })
 }
 
@@ -442,7 +438,10 @@ fn build_io_top(w: u16, h: u16) -> Widget {
                         Style::fg(Color::WHITE),
                     ),
                     ui::span(" ", Style::default()),
-                    ui::span(format!("{:>9}", fmt_rate(p.total_bps)), Style::fg(col.clone())),
+                    ui::span(
+                        format!("{:>9}", fmt_rate(p.total_bps)),
+                        Style::fg(col.clone()),
+                    ),
                     ui::span(" ", Style::default()),
                     ui::span(bar, Style::fg(col)),
                 ]));
@@ -651,7 +650,11 @@ mod tests {
     #[test]
     fn io_snapshot_total_bps() {
         let snap = make_snap(vec![
-            ("rust-analyzer", 10.0 * 1024.0 * 1024.0, 2.0 * 1024.0 * 1024.0),
+            (
+                "rust-analyzer",
+                10.0 * 1024.0 * 1024.0,
+                2.0 * 1024.0 * 1024.0,
+            ),
             ("postgres", 0.5 * 1024.0 * 1024.0, 5.0 * 1024.0 * 1024.0),
         ]);
         let want = 17.5 * 1024.0 * 1024.0;
@@ -694,9 +697,11 @@ mod tests {
 
     #[test]
     fn build_io_top_serialises() {
-        inject(make_snap(vec![
-            ("rust-analyzer", 18.0 * 1024.0 * 1024.0, 2.0 * 1024.0 * 1024.0),
-        ]));
+        inject(make_snap(vec![(
+            "rust-analyzer",
+            18.0 * 1024.0 * 1024.0,
+            2.0 * 1024.0 * 1024.0,
+        )]));
         let w = build_io_top(40, 8);
         let json = serde_json::to_string(&w).expect("serialises");
         assert!(!json.is_empty());

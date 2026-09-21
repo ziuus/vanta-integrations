@@ -1,12 +1,19 @@
 [workspace]
 members = [
-    "sdk",
+    "security",
     "sentinel",
     "iowatch",
     "portwatch",
-    "crypto_coin", "cryptopulse", "mediadeck", "filespace",
-    "security", "netscope",
+    "netscope",
     "proctrace",
-    "servicewatch", "proctrace", "mediadeck", "filespace", "filespace",
+    "servicewatch",
+    "crypto_coin",
+    "cryptopulse",
+    "mediadeck",
+    "filespace_browser",
+    "filespace_preview",
+    "filespace_sidebar",
+    "filespace_queue",
+    "filespace_path",
 ]
 resolver = "2"

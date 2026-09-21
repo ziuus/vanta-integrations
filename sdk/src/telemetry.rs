@@ -65,7 +65,7 @@ pub fn parse_response<T: for<'de> Deserialize<'de>>(raw: &str) -> Result<T> {
     serde_json::from_value(data.clone()).map_err(|e| TelemetryError::Decode(e.to_string()))
 }
 
-fn query<T: for<'de> Deserialize<'de>>(request: &str) -> Result<T> {
+pub fn query<T: for<'de> Deserialize<'de>>(request: &str) -> Result<T> {
     let raw = unsafe { vanta_query(request.to_string()) }
         .map_err(|e| TelemetryError::Host(e.to_string()))?;
     parse_response(&raw)

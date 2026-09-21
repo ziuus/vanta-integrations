@@ -39,7 +39,7 @@ struct Store {
     roots: Vec<u32>,
     prev_pids: HashSet<u32>,
     activity: Vec<ProcEvent>,
-    
+
     error: Option<String>,
 }
 
@@ -96,22 +96,25 @@ fn tick() {
                 Err(e) => st.error = Some(e.to_string()),
                 Ok(snap) => {
                     st.error = None;
-                    
+
                     let mut nodes: HashMap<u32, Node> = HashMap::new();
                     let mut current_pids = HashSet::new();
-                    
+
                     for p in snap.processes {
                         current_pids.insert(p.pid);
-                        nodes.insert(p.pid, Node {
-                            proc: p,
-                            children: Vec::new(),
-                        });
+                        nodes.insert(
+                            p.pid,
+                            Node {
+                                proc: p,
+                                children: Vec::new(),
+                            },
+                        );
                     }
 
                     // Build tree
                     let mut roots = Vec::new();
                     let mut children_map: HashMap<u32, Vec<u32>> = HashMap::new();
-                    
+
                     for p in nodes.values() {
                         let ppid = p.proc.ppid;
                         let pid = p.proc.pid;
@@ -121,14 +124,14 @@ fn tick() {
                             children_map.entry(ppid).or_default().push(pid);
                         }
                     }
-                    
+
                     for (ppid, children) in children_map {
                         if let Some(node) = nodes.get_mut(&ppid) {
                             node.children = children;
                             node.children.sort_unstable(); // Deterministic ordering
                         }
                     }
-                    
+
                     roots.sort_unstable(); // Deterministic ordering
 
                     // Detect Starts
@@ -142,7 +145,9 @@ fn tick() {
                                 kind: EventKind::Started,
                                 ts_ms: now,
                             };
-                            if st.activity.len() >= ACTIVITY_RING { st.activity.remove(0); }
+                            if st.activity.len() >= ACTIVITY_RING {
+                                st.activity.remove(0);
+                            }
                             st.activity.push(ev);
                         }
                     }
@@ -150,10 +155,14 @@ fn tick() {
                     // Detect Exits
                     let mut closed_events = Vec::new();
                     let prev = st.prev_pids.clone();
-            for pid in prev {
+                    for pid in prev {
                         if !current_pids.contains(&pid) {
                             // Find name from previous state if possible
-                            let name = st.nodes.get(&pid).map(|n| n.proc.name.clone()).unwrap_or_else(|| "?".to_string());
+                            let name = st
+                                .nodes
+                                .get(&pid)
+                                .map(|n| n.proc.name.clone())
+                                .unwrap_or_else(|| "?".to_string());
                             let ppid = st.nodes.get(&pid).map(|n| n.proc.ppid).unwrap_or(0);
                             closed_events.push(ProcEvent {
                                 pid,
@@ -164,9 +173,11 @@ fn tick() {
                             });
                         }
                     }
-                    
+
                     for ev in closed_events {
-                        if st.activity.len() >= ACTIVITY_RING { st.activity.remove(0); }
+                        if st.activity.len() >= ACTIVITY_RING {
+                            st.activity.remove(0);
+                        }
                         st.activity.push(ev);
                     }
 
@@ -181,8 +192,14 @@ fn tick() {
 
 fn error_widget(title: &str, msg: &str) -> Widget {
     Widget::paragraph(vec![
-        Line::new(vec![Span { content: format!("{title} — error"), style: Some(Style::fg(Color::RED).bold()) }]),
-        Line::new(vec![Span { content: msg.to_string(), style: Some(Style::dim()) }]),
+        Line::new(vec![Span {
+            content: format!("{title} — error"),
+            style: Some(Style::fg(Color::RED).bold()),
+        }]),
+        Line::new(vec![Span {
+            content: msg.to_string(),
+            style: Some(Style::dim()),
+        }]),
     ])
     .block(Block::titled(format!(" {title} ")))
 }
@@ -199,9 +216,9 @@ fn render_node(
     if lines.len() >= height {
         return;
     }
-    
+
     let Some(node) = nodes.get(&pid) else { return };
-    
+
     let branch = if prefix.is_empty() {
         ""
     } else if is_last {
@@ -209,7 +226,7 @@ fn render_node(
     } else {
         "├─ "
     };
-    
+
     let state_col = if node.proc.state == "R" {
         Color::GREEN
     } else if node.proc.state == "Z" {
@@ -218,25 +235,58 @@ fn render_node(
         Color::DARK_GRAY
     };
 
-    let name = format!("{:<14}", node.proc.name.chars().take(13).collect::<String>());
+    let name = format!(
+        "{:<14}",
+        node.proc.name.chars().take(13).collect::<String>()
+    );
     let pid_str = format!("{:>6}", pid);
     let state_str = format!("{:<2}", node.proc.state.chars().take(2).collect::<String>());
     let threads_str = format!("{:>3}", node.proc.threads);
     let uid_str = format!("{:>4}", node.proc.uid);
 
     lines.push(Line::new(vec![
-        Span { content: format!("{prefix}{branch}"), style: Some(Style::dim()) },
-        Span { content: name, style: Some(Style::fg(Color::WHITE).bold()) },
-        Span { content: " ".into(), style: None },
-        Span { content: pid_str, style: Some(Style::fg(Color::CYAN)) },
-        Span { content: " ".into(), style: None },
-        Span { content: state_str, style: Some(Style::fg(state_col)) },
-        Span { content: " ".into(), style: None },
-        Span { content: format!("{}t", threads_str), style: Some(Style::dim()) },
-        Span { content: " ".into(), style: None },
-        Span { content: format!("u{}", uid_str), style: Some(Style::dim()) },
+        Span {
+            content: format!("{prefix}{branch}"),
+            style: Some(Style::dim()),
+        },
+        Span {
+            content: name,
+            style: Some(Style::fg(Color::WHITE).bold()),
+        },
+        Span {
+            content: " ".into(),
+            style: None,
+        },
+        Span {
+            content: pid_str,
+            style: Some(Style::fg(Color::CYAN)),
+        },
+        Span {
+            content: " ".into(),
+            style: None,
+        },
+        Span {
+            content: state_str,
+            style: Some(Style::fg(state_col)),
+        },
+        Span {
+            content: " ".into(),
+            style: None,
+        },
+        Span {
+            content: format!("{}t", threads_str),
+            style: Some(Style::dim()),
+        },
+        Span {
+            content: " ".into(),
+            style: None,
+        },
+        Span {
+            content: format!("u{}", uid_str),
+            style: Some(Style::dim()),
+        },
     ]));
-    
+
     let new_prefix = if prefix.is_empty() {
         "".to_string()
     } else if is_last {
@@ -244,66 +294,123 @@ fn render_node(
     } else {
         format!("{prefix}│  ")
     };
-    
+
     for (i, &child_pid) in node.children.iter().enumerate() {
         if lines.len() >= height {
             break;
         }
         let child_is_last = i == node.children.len() - 1;
-        render_node(child_pid, nodes, lines, new_prefix.clone(), child_is_last, height, _max_width);
+        render_node(
+            child_pid,
+            nodes,
+            lines,
+            new_prefix.clone(),
+            child_is_last,
+            height,
+            _max_width,
+        );
     }
 }
 
 fn build_proctrace(width: u16, height: u16) -> Widget {
     tick();
-    
-    let Ok(st) = STORE.try_with(|s| s.try_borrow().map(|g| (
-        g.error.clone(), g.available, g.nodes.clone(), g.roots.clone()
-    ))) else {
+
+    let Ok(st) = STORE.try_with(|s| {
+        s.try_borrow().map(|g| {
+            (
+                g.error.clone(),
+                g.available,
+                g.nodes.clone(),
+                g.roots.clone(),
+            )
+        })
+    }) else {
         return error_widget("PROCTRACE", "store busy");
     };
-    
-    let Ok((err, avail, nodes, roots)) = st else { return error_widget("PROCTRACE", "store busy"); };
 
-    if !avail { return error_widget("PROCTRACE", "process_tree unavailable"); }
-    if let Some(e) = err { return error_widget("PROCTRACE", &e); }
-    if nodes.is_empty() { return error_widget("PROCTRACE", "Loading..."); }
+    let Ok((err, avail, nodes, roots)) = st else {
+        return error_widget("PROCTRACE", "store busy");
+    };
+
+    if !avail {
+        return error_widget("PROCTRACE", "process_tree unavailable");
+    }
+    if let Some(e) = err {
+        return error_widget("PROCTRACE", &e);
+    }
+    if nodes.is_empty() {
+        return error_widget("PROCTRACE", "Loading...");
+    }
 
     let mut lines = Vec::new();
-    lines.push(Line::new(vec![Span { content: "TREE           NAME            PID ST THR   UID".into(), style: Some(Style::dim()) }]));
-    lines.push(Line::new(vec![Span { content: "─".repeat(width as usize), style: Some(Style::dim()) }]));
+    lines.push(Line::new(vec![Span {
+        content: "TREE           NAME            PID ST THR   UID".into(),
+        style: Some(Style::dim()),
+    }]));
+    lines.push(Line::new(vec![Span {
+        content: "─".repeat(width as usize),
+        style: Some(Style::dim()),
+    }]));
 
     let max_lines = height.saturating_sub(2) as usize;
-    
+
     for (i, &root_pid) in roots.iter().enumerate() {
-        if lines.len() >= max_lines + 2 { break; }
-        render_node(root_pid, &nodes, &mut lines, "".to_string(), i == roots.len() - 1, max_lines + 2, width as usize);
+        if lines.len() >= max_lines + 2 {
+            break;
+        }
+        render_node(
+            root_pid,
+            &nodes,
+            &mut lines,
+            "".to_string(),
+            i == roots.len() - 1,
+            max_lines + 2,
+            width as usize,
+        );
     }
-    
+
     Widget::paragraph(lines).block(Block::titled(" PROCTRACE ".to_string()))
 }
 
 fn build_ancestry(pid: u32, width: u16, height: u16) -> Widget {
     tick();
-    
-    let Ok(st) = STORE.try_with(|s| s.try_borrow().map(|g| (
-        g.error.clone(), g.available, g.nodes.clone()
-    ))) else {
+
+    let Ok(st) = STORE.try_with(|s| {
+        s.try_borrow()
+            .map(|g| (g.error.clone(), g.available, g.nodes.clone()))
+    }) else {
         return error_widget("ANCESTRY", "store busy");
     };
-    
-    let Ok((err, avail, nodes)) = st else { return error_widget("ANCESTRY", "store busy"); };
 
-    if !avail { return error_widget("ANCESTRY", "unavailable"); }
-    if let Some(e) = err { return error_widget("ANCESTRY", &e); }
-    if nodes.is_empty() { return error_widget("ANCESTRY", "Loading..."); }
+    let Ok((err, avail, nodes)) = st else {
+        return error_widget("ANCESTRY", "store busy");
+    };
+
+    if !avail {
+        return error_widget("ANCESTRY", "unavailable");
+    }
+    if let Some(e) = err {
+        return error_widget("ANCESTRY", &e);
+    }
+    if nodes.is_empty() {
+        return error_widget("ANCESTRY", "Loading...");
+    }
 
     let mut lines = Vec::new();
-    lines.push(Line::new(vec![Span { content: "ANCESTRY       NAME            PID ST THR   UID".into(), style: Some(Style::dim()) }]));
-    lines.push(Line::new(vec![Span { content: "─".repeat(width as usize), style: Some(Style::dim()) }]));
+    lines.push(Line::new(vec![Span {
+        content: "ANCESTRY       NAME            PID ST THR   UID".into(),
+        style: Some(Style::dim()),
+    }]));
+    lines.push(Line::new(vec![Span {
+        content: "─".repeat(width as usize),
+        style: Some(Style::dim()),
+    }]));
 
     if !nodes.contains_key(&pid) {
-        lines.push(Line::new(vec![Span { content: format!("Process {} not found", pid), style: Some(Style::fg(Color::RED)) }]));
+        lines.push(Line::new(vec![Span {
+            content: format!("Process {} not found", pid),
+            style: Some(Style::fg(Color::RED)),
+        }]));
         return Widget::paragraph(lines).block(Block::titled(" PROCTRACE ANCESTRY ".to_string()));
     }
 
@@ -320,24 +427,53 @@ fn build_ancestry(pid: u32, width: u16, height: u16) -> Widget {
 
     let max_lines = height.saturating_sub(2) as usize;
     let skip = path.len().saturating_sub(max_lines);
-    
+
     for (i, &p) in path.iter().skip(skip).enumerate() {
         let node = &nodes[&p];
         let prefix = "  ".repeat(i);
         let branch = if i == 0 { "" } else { "└─ " };
-        
-        let state_col = if node.proc.state == "R" { Color::GREEN } else { Color::DARK_GRAY };
-        let name = format!("{:<14}", node.proc.name.chars().take(13).collect::<String>());
+
+        let state_col = if node.proc.state == "R" {
+            Color::GREEN
+        } else {
+            Color::DARK_GRAY
+        };
+        let name = format!(
+            "{:<14}",
+            node.proc.name.chars().take(13).collect::<String>()
+        );
         let pid_str = format!("{:>6}", p);
         let state_str = format!("{:<2}", node.proc.state.chars().take(2).collect::<String>());
 
         lines.push(Line::new(vec![
-            Span { content: format!("{prefix}{branch}"), style: Some(Style::dim()) },
-            Span { content: name, style: Some(if p == pid { Style::fg(Color::CYAN).bold() } else { Style::fg(Color::WHITE) }) },
-            Span { content: " ".into(), style: None },
-            Span { content: pid_str, style: Some(Style::fg(Color::CYAN)) },
-            Span { content: " ".into(), style: None },
-            Span { content: state_str, style: Some(Style::fg(state_col)) },
+            Span {
+                content: format!("{prefix}{branch}"),
+                style: Some(Style::dim()),
+            },
+            Span {
+                content: name,
+                style: Some(if p == pid {
+                    Style::fg(Color::CYAN).bold()
+                } else {
+                    Style::fg(Color::WHITE)
+                }),
+            },
+            Span {
+                content: " ".into(),
+                style: None,
+            },
+            Span {
+                content: pid_str,
+                style: Some(Style::fg(Color::CYAN)),
+            },
+            Span {
+                content: " ".into(),
+                style: None,
+            },
+            Span {
+                content: state_str,
+                style: Some(Style::fg(state_col)),
+            },
         ]));
     }
 
@@ -346,75 +482,139 @@ fn build_ancestry(pid: u32, width: u16, height: u16) -> Widget {
 
 fn build_descendants(pid: u32, width: u16, height: u16) -> Widget {
     tick();
-    
-    let Ok(st) = STORE.try_with(|s| s.try_borrow().map(|g| (
-        g.error.clone(), g.available, g.nodes.clone()
-    ))) else {
+
+    let Ok(st) = STORE.try_with(|s| {
+        s.try_borrow()
+            .map(|g| (g.error.clone(), g.available, g.nodes.clone()))
+    }) else {
         return error_widget("DESCENDANTS", "store busy");
     };
-    
-    let Ok((err, avail, nodes)) = st else { return error_widget("DESCENDANTS", "store busy"); };
 
-    if !avail { return error_widget("DESCENDANTS", "unavailable"); }
-    if let Some(e) = err { return error_widget("DESCENDANTS", &e); }
-    if nodes.is_empty() { return error_widget("DESCENDANTS", "Loading..."); }
+    let Ok((err, avail, nodes)) = st else {
+        return error_widget("DESCENDANTS", "store busy");
+    };
+
+    if !avail {
+        return error_widget("DESCENDANTS", "unavailable");
+    }
+    if let Some(e) = err {
+        return error_widget("DESCENDANTS", &e);
+    }
+    if nodes.is_empty() {
+        return error_widget("DESCENDANTS", "Loading...");
+    }
 
     let mut lines = Vec::new();
-    lines.push(Line::new(vec![Span { content: "SUBTREE        NAME            PID ST THR   UID".into(), style: Some(Style::dim()) }]));
-    lines.push(Line::new(vec![Span { content: "─".repeat(width as usize), style: Some(Style::dim()) }]));
+    lines.push(Line::new(vec![Span {
+        content: "SUBTREE        NAME            PID ST THR   UID".into(),
+        style: Some(Style::dim()),
+    }]));
+    lines.push(Line::new(vec![Span {
+        content: "─".repeat(width as usize),
+        style: Some(Style::dim()),
+    }]));
 
     if !nodes.contains_key(&pid) {
-        lines.push(Line::new(vec![Span { content: format!("Process {} not found", pid), style: Some(Style::fg(Color::RED)) }]));
+        lines.push(Line::new(vec![Span {
+            content: format!("Process {} not found", pid),
+            style: Some(Style::fg(Color::RED)),
+        }]));
         return Widget::paragraph(lines).block(Block::titled(" PROCTRACE SUBTREE ".to_string()));
     }
 
     let max_lines = height.saturating_sub(2) as usize;
-    render_node(pid, &nodes, &mut lines, "".to_string(), true, max_lines + 2, width as usize);
+    render_node(
+        pid,
+        &nodes,
+        &mut lines,
+        "".to_string(),
+        true,
+        max_lines + 2,
+        width as usize,
+    );
 
     Widget::paragraph(lines).block(Block::titled(format!(" SUBTREE {} ", pid)))
 }
 
 fn build_activity(_width: u16, height: u16) -> Widget {
     tick();
-    
-    let Ok(st) = STORE.try_with(|s| s.try_borrow().map(|g| (
-        g.error.clone(), g.available, g.activity.clone()
-    ))) else {
+
+    let Ok(st) = STORE.try_with(|s| {
+        s.try_borrow()
+            .map(|g| (g.error.clone(), g.available, g.activity.clone()))
+    }) else {
         return error_widget("ACTIVITY", "store busy");
     };
-    
-    let Ok((err, avail, activity)) = st else { return error_widget("ACTIVITY", "store busy"); };
 
-    if !avail { return error_widget("ACTIVITY", "unavailable"); }
-    if let Some(e) = err { return error_widget("ACTIVITY", &e); }
-    
+    let Ok((err, avail, activity)) = st else {
+        return error_widget("ACTIVITY", "store busy");
+    };
+
+    if !avail {
+        return error_widget("ACTIVITY", "unavailable");
+    }
+    if let Some(e) = err {
+        return error_widget("ACTIVITY", &e);
+    }
+
     let mut lines = Vec::new();
-    lines.push(Line::new(vec![Span { content: "ACTIVITY".into(), style: Some(Style::dim()) }]));
-    
+    lines.push(Line::new(vec![Span {
+        content: "ACTIVITY".into(),
+        style: Some(Style::dim()),
+    }]));
+
     let now = now_ms();
     let max_act = height.saturating_sub(2) as usize;
-    
+
     for ev in activity.iter().rev().take(max_act.max(1)) {
-        let sign = if ev.kind == EventKind::Started { "+" } else { "-" };
-        let sign_color = if ev.kind == EventKind::Started { Color::GREEN } else { Color::RED };
+        let sign = if ev.kind == EventKind::Started {
+            "+"
+        } else {
+            "-"
+        };
+        let sign_color = if ev.kind == EventKind::Started {
+            Color::GREEN
+        } else {
+            Color::RED
+        };
         let name = format!("{:<15}", ev.name.chars().take(14).collect::<String>());
         let age_str = format_age(now.saturating_sub(ev.ts_ms));
-        
+
         lines.push(Line::new(vec![
-            Span { content: format!("{} ", sign), style: Some(Style::fg(sign_color).bold()) },
-            Span { content: name, style: Some(Style::fg(Color::WHITE).bold()) },
-            Span { content: format!("{:>6} ", ev.pid), style: Some(Style::fg(Color::CYAN)) },
-            Span { content: format!("(ppid {:>5}) ", ev.ppid), style: Some(Style::dim()) },
-            Span { content: format!("{:>4}", age_str), style: Some(Style::dim()) },
+            Span {
+                content: format!("{} ", sign),
+                style: Some(Style::fg(sign_color).bold()),
+            },
+            Span {
+                content: name,
+                style: Some(Style::fg(Color::WHITE).bold()),
+            },
+            Span {
+                content: format!("{:>6} ", ev.pid),
+                style: Some(Style::fg(Color::CYAN)),
+            },
+            Span {
+                content: format!("(ppid {:>5}) ", ev.ppid),
+                style: Some(Style::dim()),
+            },
+            Span {
+                content: format!("{:>4}", age_str),
+                style: Some(Style::dim()),
+            },
         ]));
     }
-    
+
     Widget::paragraph(lines).block(Block::titled(" PROCTRACE ACTIVITY ".to_string()))
 }
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["proctrace", "proctrace_activity", "proctrace_ancestry_1", "proctrace_descendants_1"]);
+    let ids = serde_json::json!([
+        "proctrace",
+        "proctrace_activity",
+        "proctrace_ancestry_1",
+        "proctrace_descendants_1"
+    ]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
@@ -458,13 +658,19 @@ mod tests {
     fn inject(snap: ProcessTreeSnapshot) {
         STORE.with(|s| {
             let mut st = s.borrow_mut();
-            
+
             let mut nodes: HashMap<u32, Node> = HashMap::new();
             let mut current_pids = HashSet::new();
-            
+
             for p in snap.processes {
                 current_pids.insert(p.pid);
-                nodes.insert(p.pid, Node { proc: p, children: Vec::new() });
+                nodes.insert(
+                    p.pid,
+                    Node {
+                        proc: p,
+                        children: Vec::new(),
+                    },
+                );
             }
 
             let mut roots = Vec::new();
@@ -478,14 +684,14 @@ mod tests {
                     children_map.entry(ppid).or_default().push(pid);
                 }
             }
-            
+
             for (ppid, children) in children_map {
                 if let Some(node) = nodes.get_mut(&ppid) {
                     node.children = children;
                     node.children.sort_unstable();
                 }
             }
-            
+
             roots.sort_unstable();
 
             // Detect Starts
@@ -509,7 +715,11 @@ mod tests {
                     let ev = ProcEvent {
                         pid,
                         ppid: st.nodes.get(&pid).map(|n| n.proc.ppid).unwrap_or(0),
-                        name: st.nodes.get(&pid).map(|n| n.proc.name.clone()).unwrap_or_else(|| "?".to_string()),
+                        name: st
+                            .nodes
+                            .get(&pid)
+                            .map(|n| n.proc.name.clone())
+                            .unwrap_or_else(|| "?".to_string()),
                         kind: EventKind::Exited,
                         ts_ms: 1000,
                     };
@@ -520,7 +730,9 @@ mod tests {
             st.prev_pids = current_pids;
             st.nodes = nodes;
             st.roots = roots;
-            st.available = true; st.caps_done = true; st.last_fetch_ms = vanta_ext_sdk::history::now_ms();
+            st.available = true;
+            st.caps_done = true;
+            st.last_fetch_ms = vanta_ext_sdk::history::now_ms();
             st.error = None;
         });
     }
@@ -529,10 +741,7 @@ mod tests {
     fn test_parent_child_reconstruction() {
         inject(ProcessTreeSnapshot {
             total: 2,
-            processes: vec![
-                make_proc(1, 0, "init"),
-                make_proc(2, 1, "child"),
-            ]
+            processes: vec![make_proc(1, 0, "init"), make_proc(2, 1, "child")],
         });
         STORE.with(|s| {
             let st = s.borrow();
@@ -549,7 +758,7 @@ mod tests {
                 make_proc(1, 0, "init"),
                 make_proc(2, 0, "kthreadd"),
                 make_proc(3, 2, "worker"),
-            ]
+            ],
         });
         STORE.with(|s| {
             let st = s.borrow();
@@ -564,7 +773,7 @@ mod tests {
             total: 1,
             processes: vec![
                 make_proc(50, 49, "orphan"), // 49 is not in the list
-            ]
+            ],
         });
         STORE.with(|s| {
             let st = s.borrow();
@@ -583,7 +792,7 @@ mod tests {
                 make_proc(2, 1, "a"),
                 make_proc(3, 2, "b"),
                 make_proc(4, 3, "c"),
-            ]
+            ],
         });
         let w = build_ancestry(4, 80, 24);
         let s = serde_json::to_string(&w).unwrap();
@@ -602,7 +811,7 @@ mod tests {
                 make_proc(2, 1, "a"),
                 make_proc(3, 2, "b"),
                 make_proc(4, 2, "c"),
-            ]
+            ],
         });
         let w = build_descendants(2, 80, 24);
         let s = serde_json::to_string(&w).unwrap();
@@ -619,12 +828,12 @@ mod tests {
             st.prev_pids.clear();
             st.activity.clear();
         });
-        
+
         inject(ProcessTreeSnapshot {
             total: 1,
             processes: vec![make_proc(10, 1, "temp")],
         });
-        
+
         STORE.with(|s| {
             let st = s.borrow();
             assert_eq!(st.activity.len(), 1);
@@ -635,7 +844,7 @@ mod tests {
             total: 0,
             processes: vec![],
         });
-        
+
         STORE.with(|s| {
             let st = s.borrow();
             assert_eq!(st.activity.len(), 2);
@@ -652,7 +861,7 @@ mod tests {
                 make_proc(1, 0, "init"),
                 make_proc(30, 1, "z"),
                 make_proc(20, 1, "a"),
-            ]
+            ],
         });
         STORE.with(|s| {
             let st = s.borrow();
