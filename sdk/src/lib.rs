@@ -19,7 +19,7 @@ pub mod ui;
 pub mod viz;
 
 pub use history::History;
-pub use ui::{Block, Color, Line, Style, Widget};
+pub use ui::{Block, Color, Line, Span, Style, Widget};
 
 /// Metadata returned from a plugin's `metadata` export.
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
