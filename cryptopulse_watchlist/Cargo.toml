@@ -1,5 +1,5 @@
 [package]
-name = "cryptopulse"
+name = "cryptopulse_watchlist"
 version = "0.1.0"
 edition = "2021"
 

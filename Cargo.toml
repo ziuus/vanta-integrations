@@ -8,12 +8,21 @@ members = [
     "proctrace",
     "servicewatch",
     "crypto_coin",
-    "cryptopulse",
-    "mediadeck",
+    "cryptopulse_overview",
+    "cryptopulse_movers",
+    "cryptopulse_mood",
+    "cryptopulse_watchlist",
+    "cryptopulse_stats",
+    "cryptopulse_heatmap",
     "filespace_browser",
     "filespace_preview",
     "filespace_sidebar",
     "filespace_queue",
     "filespace_path",
+    "mediadeck_now_playing",
+    "mediadeck_visualizer",
+    "mediadeck_players",
+    "mediadeck_signal",
+    "mediadeck_transport"
 ]
 resolver = "2"

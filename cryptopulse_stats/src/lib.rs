@@ -22,30 +22,8 @@ pub struct CryptoSnapshot {
     pub ready: bool,
 }
 
-#[plugin_fn]
-pub fn metadata() -> FnResult<Vec<u8>> {
-    Ok(vanta_ext_sdk::ExtensionMetadata::new(
-        "cryptopulse",
-        "CryptoPulse",
-        "0.1.0",
-        "Live crypto market data and insights.",
-        API_VERSION_TELEMETRY,
-    )
-    .to_json())
-}
 
-#[plugin_fn]
-pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!([
-        "crypto_overview",
-        "crypto_movers",
-        "crypto_mood",
-        "crypto_watchlist",
-        "crypto_stats",
-        "crypto_heatmap"
-    ]);
-    Ok(serde_json::to_vec(&ids).unwrap_or_default())
-}
+
 
 fn fetch_data() -> Result<CryptoSnapshot, TelemetryError> {
     let val = query("crypto")?;
@@ -267,19 +245,7 @@ fn build_watchlist(_width: u16, height: u16) -> Widget {
     Widget::paragraph(lines).block(Block::titled(" WATCHLIST ".to_string()))
 }
 
-#[plugin_fn]
-pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
-    let widget = match widget_id.as_str() {
-        "crypto_overview" => build_overview(80, 10),
-        "crypto_movers" => build_movers(40, 20),
-        "crypto_mood" => build_mood(40, 5),
-        "crypto_watchlist" => build_watchlist(60, 20),
-        "crypto_stats" => build_stats(80, 5),
-        "crypto_heatmap" => build_heatmap(40, 10),
-        _ => ui::unavailable("UNKNOWN WIDGET", "invalid id"),
-    };
-    Ok(widget.to_json())
-}
+
 
 fn build_stats(_width: u16, _height: u16) -> Widget {
     let Ok(snap) = fetch_data() else {
@@ -351,4 +317,34 @@ fn build_heatmap(_width: u16, height: u16) -> Widget {
     }
 
     Widget::paragraph(lines).block(Block::titled(" HEATMAP ".to_string()))
+}
+
+
+
+
+#[plugin_fn]
+pub fn metadata() -> FnResult<Vec<u8>> {
+    Ok(vanta_ext_sdk::ExtensionMetadata::new(
+        "cryptopulse_stats",
+        "CryptoPulse Stats",
+        "0.1.0",
+        "Stats component for CryptoPulse.",
+        API_VERSION_TELEMETRY,
+    )
+    .to_json())
+}
+
+#[plugin_fn]
+pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
+    let ids = serde_json::json!(["crypto_stats"]);
+    Ok(serde_json::to_vec(&ids).unwrap_or_default())
+}
+
+#[plugin_fn]
+pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
+    if id != "crypto_stats" {
+        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
+    }
+    let widget = build_stats(80, 20);
+    Ok(widget.to_json())
 }
