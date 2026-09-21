@@ -6,54 +6,76 @@ This repository contains community-contributed extensions, widgets, and pages fo
 
 ## 🔒 Security & Trust Model
 
-**Vanta v0.9+ runs extensions as secure WebAssembly (WASM) modules.**
+**Vanta runs extensions as secure WebAssembly (WASM) modules.**
 
-Unlike the old compiled architecture, v0.9 extensions are **sandboxed by default**. They cannot access your filesystem, network, or spawn processes unless you explicitly grant them permission. If an extension crashes or hangs, Vanta terminates it without dropping your terminal dashboard.
+Extensions are **sandboxed by default**. They cannot access your filesystem, network, or spawn processes. Instead, they interact with the host through highly constrained, safe JSON queries (e.g., `fs_list`, `media`, `state_get`).
+
+## 🧱 The V2 Micro-Extension Architecture
+
+To maximize customization, Vanta integrations use a **Micro-Extension Pattern**. 
+Instead of monolithic applications, **every single widget is its own independent `.wasm` file**. 
+
+If you want a File Manager, you don't install one massive plugin. You install the `filespace_browser`, `filespace_preview`, and `filespace_queue` micro-extensions, and lay them out on a page. Under the hood, they communicate via Vanta's secure **Host State Mailbox** (`state_get` / `state_set`).
 
 ---
 
 ## 📦 Available Integrations
 
-| Extension | Module Name | Description |
+### Tier 1: Deep Observability
+| Extension | Description |
+| :--- | :--- |
+| **`sentinel`** | Anomaly detection & persistence tracking graph. |
+| **`iowatch`** | Process-level disk I/O attribution and history. |
+| **`portwatch`** | Open ports and their owning processes. |
+| **`netscope`** | Live socket tracking (who is talking to whom). |
+| **`proctrace`** | Hierarchical process ancestry trees. |
+| **`servicewatch`** | Systemd service lifecycles and failures. |
+
+### Tier 2: Micro-Extension Apps
+| Application | Micro-Extensions (WASM crates) | Description |
 | :--- | :--- | :--- |
-| **Security Pack** | `vanta-security.wasm` | Live CVE security feeds and threat monitoring components running safely in WASM. |
+| **CryptoPulse** | `cryptopulse`, `crypto_coin` | Live cryptocurrency market terminals and 3D coin rendering. |
+| **MediaDeck** | `mediadeck` *(pending V2 split)* | Full MPRIS/DBus audio workstation (visualizers, players). |
+| **FileSpace** | `filespace_browser`, `filespace_preview`, `filespace_sidebar`, `filespace_queue`, `filespace_path` | A complete, native-feeling terminal file manager with safe background operations. |
 
 ---
 
-## 🛠️ How to Install an Extension
+## 🛠️ How to Install
 
-With Vanta v0.9, you no longer need to fork or recompile Vanta to use extensions.
-
-### Step 1: Download the Module
-Download the `.wasm` file (e.g., `vanta-security.wasm`) and place it in your extensions folder:
+### Step 1: Download the Modules
+Download the `.wasm` files (e.g., `filespace_browser.wasm`, `filespace_preview.wasm`) and place them in your extensions folder:
 
 ```bash
 mkdir -p ~/.config/vanta/extensions/
-cp vanta-security.wasm ~/.config/vanta/extensions/
+cp *.wasm ~/.config/vanta/extensions/
 ```
 
 ### Step 2: Enable & Place in `config.toml`
-Open your `~/.config/vanta/config.toml` and enable the extension:
+Open your `~/.config/vanta/config.toml` and enable the extensions you want:
 
 ```toml
 [extensions]
-enabled = ["security"]
+enabled = [
+  "filespace_browser",
+  "filespace_preview",
+  "filespace_sidebar"
+]
 
-# Place extension components directly in your layout grid
-[dashboard]
+# Build your custom workspace using the widget IDs
+[[pages]]
+name = "File Space"
 layout = [
-    ["system", "cpu", "memory"],
-    ["cve_feed", "processes"]
+    ["filespace_sidebar", "filespace_browser", "filespace_preview"]
 ]
 ```
 
-That's it! Restart Vanta, and the extension will load dynamically at runtime.
+That's it! Restart Vanta, and the extensions will load dynamically at runtime.
 
 ---
 
-## 🚀 How to Build a WASM Extension
+## 🚀 How to Build a WASM Micro-Extension
 
-Want to build and share your own extension for Vanta? It's incredibly easy using Rust and Extism.
+We use `extism-pdk` and `vanta-ext-sdk`.
 
 ### 1. Create a cdylib Crate
 ```bash
@@ -69,55 +91,47 @@ crate-type = ["cdylib"]
 extism-pdk = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+vanta-ext-sdk = { path = "../sdk" }
 ```
 
 ### 2. Implement the Vanta UI Protocol
-In `src/lib.rs`, simply use the `extism_pdk` to return a JSON layout that matches Vanta's declarative UI protocol:
+In `src/lib.rs`:
 
 ```rust
 use extism_pdk::*;
-use serde_json::json;
+use vanta_ext_sdk::{
+    telemetry::query,
+    ui::{Widget, Block, Line, Span, Style, Color, unavailable},
+};
 
 #[plugin_fn]
-pub fn metadata() -> FnResult<Vec<u8>> {
-    let meta = json!({
-        "id": "my_ext",
-        "name": "My Extension",
-        "author": "Your Name",
-        "version": "0.1.0",
-        "description": "A custom Vanta extension.",
-        "api_version": "0.9.0"
-    });
-    Ok(serde_json::to_vec(&meta)?)
-}
-
-#[plugin_fn]
-pub fn widgets() -> FnResult<Vec<u8>> {
+pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
     Ok(serde_json::to_vec(&vec!["my_widget"])?)
 }
 
 #[plugin_fn]
-pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
-    if widget_id == "my_widget" {
-        let ui = json!({
-            "type": "Paragraph",
-            "lines": [ { "spans": [ { "content": "Hello from WASM!" } ] } ],
-            "block": { "title": " My Widget ", "bordered": true }
-        });
-        Ok(serde_json::to_vec(&ui)?)
+pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
+    if id == "my_widget" {
+        let widget = Widget::paragraph(vec![]).block(Block::titled(" MY WIDGET "));
+        Ok(widget.to_json())
     } else {
-        Ok(vec![])
+        Ok(unavailable("UNKNOWN", "Invalid widget id").to_json())
     }
 }
 ```
 
-### 3. Compile to WebAssembly
-```bash
-cargo build --release --target wasm32-unknown-unknown
+### 3. State Mailbox (Inter-Extension Communication)
+Because each widget is a separate sandboxed `.wasm` file, they share data via the host mailbox:
+
+**Writer (e.g., a Browser list):**
+```rust
+let req = serde_json::json!({ "topic": "state_set", "key": "selected_file", "value": "/etc/hosts" });
+let _ = query::<serde_json::Value>(&req.to_string());
 ```
-Your compiled extension is ready at `target/wasm32-unknown-unknown/release/my_extension.wasm`.
 
----
-
-## 📄 License
-MIT License. See individual crate directories for specific licensing details if applicable.
+**Reader (e.g., a Preview pane):**
+```rust
+let req = serde_json::json!({ "topic": "state_get", "key": "selected_file" });
+let val = query::<serde_json::Value>(&req.to_string())?;
+// Parse the value and render...
+```

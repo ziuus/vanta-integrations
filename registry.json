@@ -1,32 +1,62 @@
 {
-  "api_version": "0.9.1",
+  "api_version": "0.10.0",
   "extensions": [
     {
       "id": "security",
       "name": "Vanta Security",
       "description": "Live CVE security feeds and threat monitoring.",
       "version": "0.1.0",
-      "api_version": "0.9.0",
+      "api_version": "0.10.0",
       "author": "Community",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/security.wasm",
-      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92"
+      "wasm_url": "",
+      "sha256": ""
     },
     {
-      "id": "crypto_coin",
-      "name": "3D Rotating Coin",
-      "description": "High-detail mathematically rendered 3D crypto coin visualization.",
-      "version": "1.1.0",
-      "api_version": "0.9.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
-      "sha256": "53ffa2070cea8ff4fe64a90476addb8c108e274e0a31515b79ee5b5cc84debaa"
-    },
-    {
-      "id": "cryptopulse",
-      "name": "CryptoPulse",
-      "description": "Premium live crypto market data and insights.",
+      "id": "filespace_browser",
+      "name": "FileSpace Browser",
+      "description": "Terminal file manager navigation pane.",
       "version": "0.1.0",
-      "api_version": "0.9.2",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": ""
+    },
+    {
+      "id": "filespace_preview",
+      "name": "FileSpace Preview",
+      "description": "Terminal file manager preview pane.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": ""
+    },
+    {
+      "id": "filespace_sidebar",
+      "name": "FileSpace Sidebar",
+      "description": "Terminal file manager sidebar.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": ""
+    },
+    {
+      "id": "filespace_queue",
+      "name": "FileSpace Queue",
+      "description": "Terminal file manager operations queue.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": ""
+    },
+    {
+      "id": "filespace_path",
+      "name": "FileSpace Path",
+      "description": "Terminal file manager path breadcrumb.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "",
       "sha256": ""
