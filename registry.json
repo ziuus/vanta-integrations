@@ -2,64 +2,334 @@
   "api_version": "0.10.0",
   "extensions": [
     {
-      "id": "security",
-      "name": "Vanta Security",
-      "description": "Live CVE security feeds and threat monitoring.",
+      "id": "sentinel",
+      "name": "Sentinel System Sentry",
+      "description": "Anomaly detection, incident tracking, and health metrics engine.",
       "version": "0.1.0",
       "api_version": "0.10.0",
-      "author": "Community",
-      "wasm_url": "",
-      "sha256": ""
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/sentinel.wasm",
+      "sha256": "116d74e07bdde5942ce2bd7c2a4fb0b2b89d837edeaa48fd4d1a0ff42a7c10b4"
+    },
+    {
+      "id": "iowatch_main",
+      "name": "IOWatch",
+      "description": "Process disk I/O monitoring and throughput tracking.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_main.wasm",
+      "sha256": "7b8c9370fd7c8aec9f5343708487503549870efbf088b779ade81fdadbd1043d"
+    },
+    {
+      "id": "iowatch_top",
+      "name": "IOWatch Top IO",
+      "description": "Top I/O consuming processes leaderboard.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_top.wasm",
+      "sha256": "fc9a929ee0a3fdac5d449836bc8c95f821965812888f307be639b71349858d5a"
+    },
+    {
+      "id": "iowatch_activity",
+      "name": "IOWatch Activity",
+      "description": "Disk I/O burst and activity events timeline.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_activity.wasm",
+      "sha256": "56e0fda3a914c2935bbdadf0dd3d9ed5ac25bc1b4993148f43808240aa302bbc"
+    },
+    {
+      "id": "netscope_main",
+      "name": "NetScope",
+      "description": "Live socket network connection tracking and bandwidth monitor.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_main.wasm",
+      "sha256": "03cca81a41cf35df1f9124d4d340e82c43550c61c8692f14f6cd7d5da436bc4c"
+    },
+    {
+      "id": "netscope_table",
+      "name": "NetScope Table",
+      "description": "Active socket connection details and remote host endpoints.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_table.wasm",
+      "sha256": "b9d3cdd381109bc66f67d199ff56178a02d33c8739ba9576982461189be12aa1"
+    },
+    {
+      "id": "netscope_activity",
+      "name": "NetScope Activity",
+      "description": "Network interface and socket event history.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_activity.wasm",
+      "sha256": "f8d33372ca2021ebb99901a38c4626f3cfae93299f7b9e104c6b0ffcd03d1e8e"
+    },
+    {
+      "id": "netscope_summary",
+      "name": "NetScope Summary",
+      "description": "Summary overview of active network listeners and bandwidth.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_summary.wasm",
+      "sha256": "d8a8122e0110f50487e1b83fe8bc02978e546e942565aa6467ed7ed6e3459c9c"
+    },
+    {
+      "id": "portwatch_main",
+      "name": "PortWatch",
+      "description": "Active listening port monitor and socket ownership inspector.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_main.wasm",
+      "sha256": "7e45065e0442aa31476628465afc996eefb9971e82cf870baca23de273e3d86e"
+    },
+    {
+      "id": "portwatch_listeners",
+      "name": "PortWatch Listeners",
+      "description": "Listening TCP/UDP ports mapped to owning processes.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_listeners.wasm",
+      "sha256": "2134c15774b231ceea4c90e9c5342f0164507da561fa71b7ea70d348b41a821d"
+    },
+    {
+      "id": "portwatch_activity",
+      "name": "PortWatch Activity",
+      "description": "Port listener change history and socket lifecycle events.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_activity.wasm",
+      "sha256": "837009ed459999b186ee94487cb292d4d52487a369fcf37c6eeee7d502735f77"
+    },
+    {
+      "id": "proctrace_main",
+      "name": "ProcTrace",
+      "description": "Process ancestry hierarchy tree and lifecycle tracker.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_main.wasm",
+      "sha256": "b00b82b8c42eb88ec0d5ba7fa3313106b53cd76212e60d989d9025a7bc8547ce"
+    },
+    {
+      "id": "proctrace_activity",
+      "name": "ProcTrace Activity",
+      "description": "Process fork, exec, and exit lifecycle event stream.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_activity.wasm",
+      "sha256": "3fce91300aafbaadcddf3e5c5a530b37e4006bfc26c920016831a9b72620f65f"
+    },
+    {
+      "id": "servicewatch_main",
+      "name": "ServiceWatch",
+      "description": "Systemd service status, state transitions, and units inspector.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_main.wasm",
+      "sha256": "e0ca4243946bec5f56fce6fb3102bcf1a164ef6f0f7f24edb07cbff849a28b8b"
+    },
+    {
+      "id": "servicewatch_activity",
+      "name": "ServiceWatch Activity",
+      "description": "Systemd service restart, failure, and state transition history.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_activity.wasm",
+      "sha256": "bd6eb7513f725c19101f8d98084dde08a716b15b8862de4b3346c6e252fd9ed7"
+    },
+    {
+      "id": "crypto_coin",
+      "name": "Crypto 3D Coin",
+      "description": "3D rotating ASCII coin visualizer for crypto assets.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
+      "sha256": "e5a0c8613a1742d722e9e0239f93ebb9acacd936fbd956df7242c1eea8fd5f71"
+    },
+    {
+      "id": "cryptopulse_overview",
+      "name": "CryptoPulse Overview",
+      "description": "Cryptocurrency market metrics, volume, and price board.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_overview.wasm",
+      "sha256": "ff29c53c6c1d8a23134969f53ef5030373b90abfab54d9035112c0e7316b1d45"
+    },
+    {
+      "id": "cryptopulse_movers",
+      "name": "CryptoPulse Top Movers",
+      "description": "Top 24h crypto market gainers and losers.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_movers.wasm",
+      "sha256": "767ef4e35bc766a52d2da4e5cbddabbbbd98080816c75b5aebbe3405b610776d"
+    },
+    {
+      "id": "cryptopulse_mood",
+      "name": "CryptoPulse Market Mood",
+      "description": "Market sentiment, fear & greed index, and volatility gauge.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_mood.wasm",
+      "sha256": "c3a6508d80c55632ee833c9dbb247258d8b0e727038ecc289bc96398159c51ad"
+    },
+    {
+      "id": "cryptopulse_watchlist",
+      "name": "CryptoPulse Watchlist",
+      "description": "Curated crypto asset tracker with live price movements.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_watchlist.wasm",
+      "sha256": "b10954a24660571efc1bf49b762466590a94b10df260399faf1e068bcaec0a85"
+    },
+    {
+      "id": "cryptopulse_stats",
+      "name": "CryptoPulse Stats",
+      "description": "Global crypto market capitalization, 24h volume, and BTC dominance.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_stats.wasm",
+      "sha256": "c51f02e558848d8f3046c94fe0d81a350c0235a2c0adbe19abf9f96f203a0e0f"
+    },
+    {
+      "id": "cryptopulse_heatmap",
+      "name": "CryptoPulse Heatmap",
+      "description": "Market sector visual performance distribution matrix.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_heatmap.wasm",
+      "sha256": "ebf3835e8f7a9861749631e294f145c82fc406a38fb51abdfdc97e9be15d2da8"
     },
     {
       "id": "filespace_browser",
       "name": "FileSpace Browser",
-      "description": "Terminal file manager navigation pane.",
+      "description": "Terminal file manager file tree and directory navigation pane.",
       "version": "0.1.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": ""
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_browser.wasm",
+      "sha256": "bb290b701bd05acf2cacb67d61dfd6c11039ad2e84d93d4e4034a9d7e7b1a1cf"
     },
     {
       "id": "filespace_preview",
       "name": "FileSpace Preview",
-      "description": "Terminal file manager preview pane.",
+      "description": "File preview pane with syntax inspection and metadata.",
       "version": "0.1.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": ""
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_preview.wasm",
+      "sha256": "100f1d2f5e565ed406336f860669c925dc0d5006cba16bef6ea71237d2f52419"
     },
     {
       "id": "filespace_sidebar",
       "name": "FileSpace Sidebar",
-      "description": "Terminal file manager sidebar.",
+      "description": "File system bookmarks, drive mounts, and directory quick-links.",
       "version": "0.1.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": ""
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_sidebar.wasm",
+      "sha256": "a9ed4053c8cc84bb0829ef47fcfdd75175692445432bb6a8afd92e876ecee27e"
     },
     {
       "id": "filespace_queue",
       "name": "FileSpace Queue",
-      "description": "Terminal file manager operations queue.",
+      "description": "Asynchronous file copy, move, and delete operation queue.",
       "version": "0.1.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": ""
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_queue.wasm",
+      "sha256": "fef00638f3d485387c640b1aa28c6cdbf0af6d76718dc7326d913476b1e69502"
     },
     {
       "id": "filespace_path",
       "name": "FileSpace Path",
-      "description": "Terminal file manager path breadcrumb.",
+      "description": "Breadcrumb path navigator with active working directory status.",
       "version": "0.1.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": ""
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_path.wasm",
+      "sha256": "d5d187a12d957a06ab93046f925e0208e21d584d31e8c940aff14e8334963b5f"
+    },
+    {
+      "id": "mediadeck_now_playing",
+      "name": "MediaDeck Now Playing",
+      "description": "Active audio track, album art display, and artist metadata.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_now_playing.wasm",
+      "sha256": "8c39ad644cb362586d5fc6f4e2ec78f0ab846374953db9c85a973536f078b35a"
+    },
+    {
+      "id": "mediadeck_visualizer",
+      "name": "MediaDeck Visualizer",
+      "description": "Real-time terminal audio spectrum and waveform visualizer.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_visualizer.wasm",
+      "sha256": "a54bd0e280bcaf7400d541055b8d79cef93c099c0d4b6e61d5bd21e82615402a"
+    },
+    {
+      "id": "mediadeck_players",
+      "name": "MediaDeck Players",
+      "description": "Active MPRIS audio/video players and source selector.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_players.wasm",
+      "sha256": "ff6d6e5d5ac4304f2912ab9c08c3e7fb759f82affaf51827b7a742a66fca281b"
+    },
+    {
+      "id": "mediadeck_signal",
+      "name": "MediaDeck Signal",
+      "description": "Audio signal pipeline and device output level meter.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_signal.wasm",
+      "sha256": "75a85b39c73b80b5fc085f987aa34e7db2ffd7cb754760399c0fcd0b59bd53de"
+    },
+    {
+      "id": "mediadeck_transport",
+      "name": "MediaDeck Transport",
+      "description": "Playback transport controls (play, pause, next, seek bar).",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
+      "sha256": "43d95ed73fcbad15c12f6640558b41aadc0a9bb36422ad0905eb4e406c63ea2c"
+    },
+    {
+      "id": "security",
+      "name": "Vanta Security",
+      "description": "Live CVE security advisory feed and system vulnerability monitor.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/security.wasm",
+      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92"
     }
   ]
 }
