@@ -2,6 +2,137 @@
   "api_version": "0.10.0",
   "extensions": [
     {
+      "id": "page_filespace",
+      "name": "FileSpace Workspace",
+      "description": "Complete terminal-native file management workspace. Includes navigation tree, quick bookmarks sidebar, metadata & syntax file preview, path navigator, and async operations queue.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "page",
+      "components": [
+        "filespace_browser",
+        "filespace_preview",
+        "filespace_sidebar",
+        "filespace_queue",
+        "filespace_path"
+      ],
+      "layout": [
+        [
+          "filespace_sidebar",
+          "filespace_queue"
+        ],
+        [
+          "filespace_path",
+          "filespace_browser"
+        ],
+        [
+          "filespace_preview"
+        ]
+      ]
+    },
+    {
+      "id": "page_cryptopulse",
+      "name": "CryptoPulse Terminal",
+      "description": "Live cryptocurrency command center. Includes real-time market overview, top gainers/losers movers, market mood/fear-greed, personal watchlist, global market stats, sector heatmap, and 3D coin visualizer.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "page",
+      "components": [
+        "cryptopulse_overview",
+        "cryptopulse_movers",
+        "cryptopulse_mood",
+        "cryptopulse_watchlist",
+        "cryptopulse_stats",
+        "cryptopulse_heatmap",
+        "crypto_coin"
+      ],
+      "layout": [
+        [
+          "cryptopulse_overview",
+          "crypto_coin"
+        ],
+        [
+          "cryptopulse_movers",
+          "cryptopulse_watchlist"
+        ],
+        [
+          "cryptopulse_mood",
+          "cryptopulse_stats",
+          "cryptopulse_heatmap"
+        ]
+      ]
+    },
+    {
+      "id": "page_mediadeck",
+      "name": "MediaDeck Audio Workstation",
+      "description": "MPRIS audio workstation with real-time waveform spectrum visualizer, player source selector, signal volume level meter, playback transport controls, and album art/track info.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "page",
+      "components": [
+        "mediadeck_now_playing",
+        "mediadeck_visualizer",
+        "mediadeck_players",
+        "mediadeck_signal",
+        "mediadeck_transport"
+      ],
+      "layout": [
+        [
+          "mediadeck_now_playing",
+          "mediadeck_transport"
+        ],
+        [
+          "mediadeck_visualizer",
+          "mediadeck_signal"
+        ],
+        [
+          "mediadeck_players"
+        ]
+      ]
+    },
+    {
+      "id": "page_observability",
+      "name": "System Sentry & Deep Observability",
+      "description": "Deep kernel & process observability suite. Includes Sentinel security anomaly detector, IOWatch disk attribution, NetScope socket tracking, PortWatch listening ports, ProcTrace ancestry tree, and ServiceWatch systemd monitor.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "page",
+      "components": [
+        "sentinel",
+        "iowatch_main",
+        "iowatch_top",
+        "netscope_main",
+        "portwatch_main",
+        "proctrace_main",
+        "servicewatch_main"
+      ],
+      "layout": [
+        [
+          "sentinel",
+          "iowatch_main"
+        ],
+        [
+          "netscope_main",
+          "portwatch_main"
+        ],
+        [
+          "proctrace_main",
+          "servicewatch_main"
+        ]
+      ]
+    },
+    {
       "id": "sentinel",
       "name": "Sentinel System Sentry",
       "description": "Anomaly detection, incident tracking, and health metrics engine.",
@@ -9,7 +140,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/sentinel.wasm",
-      "sha256": "116d74e07bdde5942ce2bd7c2a4fb0b2b89d837edeaa48fd4d1a0ff42a7c10b4"
+      "sha256": "116d74e07bdde5942ce2bd7c2a4fb0b2b89d837edeaa48fd4d1a0ff42a7c10b4",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "iowatch_main",
@@ -19,7 +153,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_main.wasm",
-      "sha256": "7b8c9370fd7c8aec9f5343708487503549870efbf088b779ade81fdadbd1043d"
+      "sha256": "7b8c9370fd7c8aec9f5343708487503549870efbf088b779ade81fdadbd1043d",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "iowatch_top",
@@ -29,7 +166,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_top.wasm",
-      "sha256": "fc9a929ee0a3fdac5d449836bc8c95f821965812888f307be639b71349858d5a"
+      "sha256": "fc9a929ee0a3fdac5d449836bc8c95f821965812888f307be639b71349858d5a",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "iowatch_activity",
@@ -39,7 +179,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_activity.wasm",
-      "sha256": "56e0fda3a914c2935bbdadf0dd3d9ed5ac25bc1b4993148f43808240aa302bbc"
+      "sha256": "56e0fda3a914c2935bbdadf0dd3d9ed5ac25bc1b4993148f43808240aa302bbc",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "netscope_main",
@@ -49,7 +192,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_main.wasm",
-      "sha256": "03cca81a41cf35df1f9124d4d340e82c43550c61c8692f14f6cd7d5da436bc4c"
+      "sha256": "03cca81a41cf35df1f9124d4d340e82c43550c61c8692f14f6cd7d5da436bc4c",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "netscope_table",
@@ -59,7 +205,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_table.wasm",
-      "sha256": "b9d3cdd381109bc66f67d199ff56178a02d33c8739ba9576982461189be12aa1"
+      "sha256": "b9d3cdd381109bc66f67d199ff56178a02d33c8739ba9576982461189be12aa1",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "netscope_activity",
@@ -69,7 +218,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_activity.wasm",
-      "sha256": "f8d33372ca2021ebb99901a38c4626f3cfae93299f7b9e104c6b0ffcd03d1e8e"
+      "sha256": "f8d33372ca2021ebb99901a38c4626f3cfae93299f7b9e104c6b0ffcd03d1e8e",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "netscope_summary",
@@ -79,7 +231,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_summary.wasm",
-      "sha256": "d8a8122e0110f50487e1b83fe8bc02978e546e942565aa6467ed7ed6e3459c9c"
+      "sha256": "d8a8122e0110f50487e1b83fe8bc02978e546e942565aa6467ed7ed6e3459c9c",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "portwatch_main",
@@ -89,7 +244,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_main.wasm",
-      "sha256": "7e45065e0442aa31476628465afc996eefb9971e82cf870baca23de273e3d86e"
+      "sha256": "7e45065e0442aa31476628465afc996eefb9971e82cf870baca23de273e3d86e",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "portwatch_listeners",
@@ -99,7 +257,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_listeners.wasm",
-      "sha256": "2134c15774b231ceea4c90e9c5342f0164507da561fa71b7ea70d348b41a821d"
+      "sha256": "2134c15774b231ceea4c90e9c5342f0164507da561fa71b7ea70d348b41a821d",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "portwatch_activity",
@@ -109,7 +270,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_activity.wasm",
-      "sha256": "837009ed459999b186ee94487cb292d4d52487a369fcf37c6eeee7d502735f77"
+      "sha256": "837009ed459999b186ee94487cb292d4d52487a369fcf37c6eeee7d502735f77",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "proctrace_main",
@@ -119,7 +283,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_main.wasm",
-      "sha256": "b00b82b8c42eb88ec0d5ba7fa3313106b53cd76212e60d989d9025a7bc8547ce"
+      "sha256": "b00b82b8c42eb88ec0d5ba7fa3313106b53cd76212e60d989d9025a7bc8547ce",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "proctrace_activity",
@@ -129,7 +296,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_activity.wasm",
-      "sha256": "3fce91300aafbaadcddf3e5c5a530b37e4006bfc26c920016831a9b72620f65f"
+      "sha256": "3fce91300aafbaadcddf3e5c5a530b37e4006bfc26c920016831a9b72620f65f",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "servicewatch_main",
@@ -139,7 +309,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_main.wasm",
-      "sha256": "e0ca4243946bec5f56fce6fb3102bcf1a164ef6f0f7f24edb07cbff849a28b8b"
+      "sha256": "e0ca4243946bec5f56fce6fb3102bcf1a164ef6f0f7f24edb07cbff849a28b8b",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "servicewatch_activity",
@@ -149,7 +322,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_activity.wasm",
-      "sha256": "bd6eb7513f725c19101f8d98084dde08a716b15b8862de4b3346c6e252fd9ed7"
+      "sha256": "bd6eb7513f725c19101f8d98084dde08a716b15b8862de4b3346c6e252fd9ed7",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "crypto_coin",
@@ -159,7 +335,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
-      "sha256": "e5a0c8613a1742d722e9e0239f93ebb9acacd936fbd956df7242c1eea8fd5f71"
+      "sha256": "e5a0c8613a1742d722e9e0239f93ebb9acacd936fbd956df7242c1eea8fd5f71",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_overview",
@@ -169,7 +348,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_overview.wasm",
-      "sha256": "ff29c53c6c1d8a23134969f53ef5030373b90abfab54d9035112c0e7316b1d45"
+      "sha256": "ff29c53c6c1d8a23134969f53ef5030373b90abfab54d9035112c0e7316b1d45",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_movers",
@@ -179,7 +361,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_movers.wasm",
-      "sha256": "767ef4e35bc766a52d2da4e5cbddabbbbd98080816c75b5aebbe3405b610776d"
+      "sha256": "767ef4e35bc766a52d2da4e5cbddabbbbd98080816c75b5aebbe3405b610776d",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_mood",
@@ -189,7 +374,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_mood.wasm",
-      "sha256": "c3a6508d80c55632ee833c9dbb247258d8b0e727038ecc289bc96398159c51ad"
+      "sha256": "c3a6508d80c55632ee833c9dbb247258d8b0e727038ecc289bc96398159c51ad",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_watchlist",
@@ -199,7 +387,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_watchlist.wasm",
-      "sha256": "b10954a24660571efc1bf49b762466590a94b10df260399faf1e068bcaec0a85"
+      "sha256": "b10954a24660571efc1bf49b762466590a94b10df260399faf1e068bcaec0a85",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_stats",
@@ -209,7 +400,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_stats.wasm",
-      "sha256": "c51f02e558848d8f3046c94fe0d81a350c0235a2c0adbe19abf9f96f203a0e0f"
+      "sha256": "c51f02e558848d8f3046c94fe0d81a350c0235a2c0adbe19abf9f96f203a0e0f",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "cryptopulse_heatmap",
@@ -219,7 +413,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_heatmap.wasm",
-      "sha256": "ebf3835e8f7a9861749631e294f145c82fc406a38fb51abdfdc97e9be15d2da8"
+      "sha256": "ebf3835e8f7a9861749631e294f145c82fc406a38fb51abdfdc97e9be15d2da8",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "filespace_browser",
@@ -229,7 +426,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_browser.wasm",
-      "sha256": "bb290b701bd05acf2cacb67d61dfd6c11039ad2e84d93d4e4034a9d7e7b1a1cf"
+      "sha256": "bb290b701bd05acf2cacb67d61dfd6c11039ad2e84d93d4e4034a9d7e7b1a1cf",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "filespace_preview",
@@ -239,7 +439,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_preview.wasm",
-      "sha256": "100f1d2f5e565ed406336f860669c925dc0d5006cba16bef6ea71237d2f52419"
+      "sha256": "100f1d2f5e565ed406336f860669c925dc0d5006cba16bef6ea71237d2f52419",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "filespace_sidebar",
@@ -249,7 +452,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_sidebar.wasm",
-      "sha256": "a9ed4053c8cc84bb0829ef47fcfdd75175692445432bb6a8afd92e876ecee27e"
+      "sha256": "a9ed4053c8cc84bb0829ef47fcfdd75175692445432bb6a8afd92e876ecee27e",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "filespace_queue",
@@ -259,7 +465,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_queue.wasm",
-      "sha256": "fef00638f3d485387c640b1aa28c6cdbf0af6d76718dc7326d913476b1e69502"
+      "sha256": "fef00638f3d485387c640b1aa28c6cdbf0af6d76718dc7326d913476b1e69502",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "filespace_path",
@@ -269,7 +478,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_path.wasm",
-      "sha256": "d5d187a12d957a06ab93046f925e0208e21d584d31e8c940aff14e8334963b5f"
+      "sha256": "d5d187a12d957a06ab93046f925e0208e21d584d31e8c940aff14e8334963b5f",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "mediadeck_now_playing",
@@ -279,7 +491,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_now_playing.wasm",
-      "sha256": "8c39ad644cb362586d5fc6f4e2ec78f0ab846374953db9c85a973536f078b35a"
+      "sha256": "8c39ad644cb362586d5fc6f4e2ec78f0ab846374953db9c85a973536f078b35a",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "mediadeck_visualizer",
@@ -289,7 +504,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_visualizer.wasm",
-      "sha256": "a54bd0e280bcaf7400d541055b8d79cef93c099c0d4b6e61d5bd21e82615402a"
+      "sha256": "a54bd0e280bcaf7400d541055b8d79cef93c099c0d4b6e61d5bd21e82615402a",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "mediadeck_players",
@@ -299,7 +517,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_players.wasm",
-      "sha256": "ff6d6e5d5ac4304f2912ab9c08c3e7fb759f82affaf51827b7a742a66fca281b"
+      "sha256": "ff6d6e5d5ac4304f2912ab9c08c3e7fb759f82affaf51827b7a742a66fca281b",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "mediadeck_signal",
@@ -309,7 +530,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_signal.wasm",
-      "sha256": "75a85b39c73b80b5fc085f987aa34e7db2ffd7cb754760399c0fcd0b59bd53de"
+      "sha256": "75a85b39c73b80b5fc085f987aa34e7db2ffd7cb754760399c0fcd0b59bd53de",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "mediadeck_transport",
@@ -319,7 +543,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
-      "sha256": "43d95ed73fcbad15c12f6640558b41aadc0a9bb36422ad0905eb4e406c63ea2c"
+      "sha256": "43d95ed73fcbad15c12f6640558b41aadc0a9bb36422ad0905eb4e406c63ea2c",
+      "type": "component",
+      "components": [],
+      "layout": []
     },
     {
       "id": "security",
@@ -329,7 +556,10 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/security.wasm",
-      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92"
+      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92",
+      "type": "component",
+      "components": [],
+      "layout": []
     }
   ]
 }
