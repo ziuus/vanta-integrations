@@ -560,6 +560,39 @@
       "type": "component",
       "components": [],
       "layout": []
+    },
+    {
+      "id": "dashboard_github",
+      "name": "GitHub Contributions",
+      "description": "Your GitHub green squares grid.",
+      "version": "1.0.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "component"
+    },
+    {
+      "id": "dashboard_thermals",
+      "name": "Radial Thermals",
+      "description": "Temperature gauges for CPU and GPU.",
+      "version": "1.0.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "component"
+    },
+    {
+      "id": "dashboard_world_clocks",
+      "name": "World Clocks",
+      "description": "A strip showing the local time in multiple time zones.",
+      "version": "1.0.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "wasm_url": "",
+      "sha256": "",
+      "type": "component"
     }
   ]
 }

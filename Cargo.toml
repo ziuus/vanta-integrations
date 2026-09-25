@@ -33,5 +33,5 @@ members = [
     "mediadeck_players",
     "mediadeck_signal",
     "mediadeck_transport"
-]
+, "dashboard_thermals", "dashboard_world_clocks", "dashboard_github", "scene_starfield", "scene_life", "scene_snow", "scene_flip", "scene_topo"]
 resolver = "2"
