@@ -1,37 +1,7 @@
 [workspace]
 members = [
-    "security",
-    "sentinel",
-    "iowatch_main",
-    "iowatch_top",
-    "iowatch_activity",
-    "portwatch_main",
-    "portwatch_listeners",
-    "portwatch_activity",
-    "netscope_main",
-    "netscope_table",
-    "netscope_activity",
-    "netscope_summary",
-    "proctrace_main",
-    "proctrace_activity",
-    "servicewatch_main",
-    "servicewatch_activity",
-    "crypto_coin",
-    "cryptopulse_overview",
-    "cryptopulse_movers",
-    "cryptopulse_mood",
-    "cryptopulse_watchlist",
-    "cryptopulse_stats",
-    "cryptopulse_heatmap",
-    "filespace_browser",
-    "filespace_preview",
-    "filespace_sidebar",
-    "filespace_queue",
-    "filespace_path",
-    "mediadeck_now_playing",
-    "mediadeck_visualizer",
-    "mediadeck_players",
-    "mediadeck_signal",
-    "mediadeck_transport"
-, "dashboard_thermals", "dashboard_world_clocks", "dashboard_github", "scene_starfield", "scene_life", "scene_snow", "scene_flip", "scene_topo"]
+    "components/*",
+    "scenes/*",
+    "sdk"
+]
 resolver = "2"

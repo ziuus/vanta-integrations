@@ -1,0 +1,15 @@
+[package]
+name = "sentinel"
+version = "0.1.0"
+edition = "2021"
+description = "Threshold watching, incident lifecycle and process correlation for Vanta"
+license = "MIT"
+
+[lib]
+name = "sentinel"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+extism-pdk = "1.4"
+serde_json = "1.0"
+vanta-ext-sdk = { path = "../../sdk" }
