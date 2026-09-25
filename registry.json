@@ -283,7 +283,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_main.wasm",
-      "sha256": "b00b82b8c42eb88ec0d5ba7fa3313106b53cd76212e60d989d9025a7bc8547ce",
+      "sha256": "87989171d471dee5ed2e0ee60a7b8383bf6faac530b909925d8f2ef2691b4a0f",
       "type": "component",
       "components": [],
       "layout": []
@@ -309,7 +309,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_main.wasm",
-      "sha256": "e0ca4243946bec5f56fce6fb3102bcf1a164ef6f0f7f24edb07cbff849a28b8b",
+      "sha256": "95a2c4ed5893475ba814cfa07ee7637f06066d77aa391ad201b952945b156a4d",
       "type": "component",
       "components": [],
       "layout": []
@@ -335,7 +335,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
-      "sha256": "e5a0c8613a1742d722e9e0239f93ebb9acacd936fbd956df7242c1eea8fd5f71",
+      "sha256": "f346c29e5c6476d78050db46ba5ed0a8585b757c093cbbdc52fe3629c46faaa6",
       "type": "component",
       "components": [],
       "layout": []
@@ -361,7 +361,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_movers.wasm",
-      "sha256": "767ef4e35bc766a52d2da4e5cbddabbbbd98080816c75b5aebbe3405b610776d",
+      "sha256": "9de86863e30e66605bb8a3bc884ea212904f28a5ac340caac031083d89c31f7d",
       "type": "component",
       "components": [],
       "layout": []
@@ -413,7 +413,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_heatmap.wasm",
-      "sha256": "ebf3835e8f7a9861749631e294f145c82fc406a38fb51abdfdc97e9be15d2da8",
+      "sha256": "474e3ce33db015c6c8aa997fcaf2a6fe41241612519c7fffc48b130fcd22f507",
       "type": "component",
       "components": [],
       "layout": []
@@ -439,7 +439,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_preview.wasm",
-      "sha256": "100f1d2f5e565ed406336f860669c925dc0d5006cba16bef6ea71237d2f52419",
+      "sha256": "e23186bacffdd54dec60544978445972a9653cc9e398840f3447f315f3226059",
       "type": "component",
       "components": [],
       "layout": []
@@ -465,7 +465,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_queue.wasm",
-      "sha256": "fef00638f3d485387c640b1aa28c6cdbf0af6d76718dc7326d913476b1e69502",
+      "sha256": "27ae96cbf4caad20dc7802ee2b6a29e9dcc54d625d14835034454cb8c9fd4e8d",
       "type": "component",
       "components": [],
       "layout": []
@@ -543,7 +543,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
-      "sha256": "43d95ed73fcbad15c12f6640558b41aadc0a9bb36422ad0905eb4e406c63ea2c",
+      "sha256": "56565cff947759da4c1a7c703417cdee521b136131847510afd92e3917fa02d9",
       "type": "component",
       "components": [],
       "layout": []
