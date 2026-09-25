@@ -7,7 +7,9 @@ This repository contains community-contributed extensions, widgets, and pages fo
 ## 📂 Repository Structure
 
 - `components/` - Standalone widgets and UI components (e.g. `dashboard_github`, `filespace_browser`).
+- `pages/` - Full-page WASM extensions or complete TOML dashboard layout templates.
 - `scenes/` - Full-screen background ambient renderers (e.g. `scene_starfield`).
+- `themes/` - Community-contributed theme definitions (TOML color palettes).
 - `sdk/` - The `vanta-ext-sdk` used to build WASM plugins.
 - `scripts/` - Maintenance and build scripts.
 - `docs/` - Technical documentation.

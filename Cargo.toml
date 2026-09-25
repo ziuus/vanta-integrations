@@ -1,7 +1,9 @@
 [workspace]
 members = [
     "components/*",
+    "pages/*",
     "scenes/*",
+    "themes/*",
     "sdk"
 ]
 resolver = "2"
