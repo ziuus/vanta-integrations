@@ -4,6 +4,14 @@ This repository contains community-contributed extensions, widgets, and pages fo
 
 ---
 
+## 📂 Repository Structure
+
+- `components/` - Standalone widgets and UI components (e.g. `dashboard_github`, `filespace_browser`).
+- `scenes/` - Full-screen background ambient renderers (e.g. `scene_starfield`).
+- `sdk/` - The `vanta-ext-sdk` used to build WASM plugins.
+- `scripts/` - Maintenance and build scripts.
+- `docs/` - Technical documentation.
+
 ## 🔒 Security & Trust Model
 
 **Vanta runs extensions as secure WebAssembly (WASM) modules.**
