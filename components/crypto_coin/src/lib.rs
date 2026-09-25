@@ -35,21 +35,21 @@ static mut TICK: u64 = 0;
 
 fn emblem_map(u: f32, v: f32) -> (bool, bool) {
     let r = (u * u + v * v).sqrt();
-    let is_border = r >= 0.82 && r <= 0.88;
+    let is_border = (0.82..=0.88).contains(&r);
 
-    let in_stem = u >= -0.22 && u <= -0.10 && v >= -0.55 && v <= 0.55;
-    let in_prongs = ((v >= 0.55 && v <= 0.70) || (v >= -0.70 && v <= -0.55))
-        && ((u >= -0.20 && u <= -0.14) || (u >= 0.04 && u <= 0.10));
+    let in_stem = (-0.22..=-0.10).contains(&u) && (-0.55..=0.55).contains(&v);
+    let in_prongs = ((0.55..=0.70).contains(&v) || (-0.70..=-0.55).contains(&v))
+        && ((-0.20..=-0.14).contains(&u) || (0.04..=0.10).contains(&u));
 
     let top_d = ((u - 0.0).powi(2) + (v - (-0.25)).powi(2)).sqrt();
-    let in_top_loop = top_d <= 0.28 && top_d >= 0.12 && u >= -0.15;
+    let in_top_loop = (0.12..=0.28).contains(&top_d) && u >= -0.15;
 
     let bot_d = ((u - 0.03).powi(2) + (v - 0.25).powi(2)).sqrt();
-    let in_bot_loop = bot_d <= 0.32 && bot_d >= 0.14 && u >= -0.15;
+    let in_bot_loop = (0.14..=0.32).contains(&bot_d) && u >= -0.15;
 
-    let in_bars = (v.abs() <= 0.06 && u >= -0.20 && u <= 0.15)
-        || ((v - (-0.50)).abs() <= 0.06 && u >= -0.20 && u <= 0.12)
-        || ((v - 0.50).abs() <= 0.06 && u >= -0.20 && u <= 0.15);
+    let in_bars = (v.abs() <= 0.06 && (-0.20..=0.15).contains(&u))
+        || ((v - (-0.50)).abs() <= 0.06 && (-0.20..=0.12).contains(&u))
+        || ((v - 0.50).abs() <= 0.06 && (-0.20..=0.15).contains(&u));
 
     (
         in_stem || in_prongs || in_top_loop || in_bot_loop || in_bars,

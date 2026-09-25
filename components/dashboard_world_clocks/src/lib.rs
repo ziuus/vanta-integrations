@@ -1,4 +1,4 @@
-use chrono::{TimeZone, Utc};
+use chrono::Utc;
 use extism_pdk::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -36,7 +36,7 @@ pub fn widgets() -> FnResult<Vec<u8>> {
 pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
     if widget_id == "world_clocks" {
         // Just hardcode some for now
-        let zones = vec![
+        let zones = [
             ("SFO", -8),
             ("NYC", -5),
             ("LON", 0),
