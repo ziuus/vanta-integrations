@@ -514,15 +514,17 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["iowatch"]);
+    let ids = serde_json::json!(["iowatch", "io_top", "io_activity"]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
 #[plugin_fn]
 pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
-    if id != "iowatch" {
-        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
-    }
-    let widget = build_iowatch(80, 24);
+    let widget = match id.as_str() {
+        "iowatch" => build_iowatch(80, 24),
+        "io_top" => build_io_top(80, 24),
+        "io_activity" => build_io_activity(80, 24),
+        _ => return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json()),
+    };
     Ok(widget.to_json())
 }

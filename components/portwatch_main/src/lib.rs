@@ -584,15 +584,17 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["portwatch"]);
+    let ids = serde_json::json!(["portwatch", "port_listeners", "port_activity"]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
 #[plugin_fn]
 pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
-    if id != "portwatch" {
-        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
-    }
-    let widget = build_portwatch(80, 24);
+    let widget = match id.as_str() {
+        "portwatch" => build_portwatch(80, 24),
+        "port_listeners" => build_port_listeners(80, 24),
+        "port_activity" => build_port_activity(80, 24),
+        _ => return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json()),
+    };
     Ok(widget.to_json())
 }

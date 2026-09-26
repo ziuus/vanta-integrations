@@ -622,15 +622,16 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["proctrace"]);
+    let ids = serde_json::json!(["proctrace", "proctrace_activity"]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
 #[plugin_fn]
 pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
-    if id != "proctrace" {
-        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
-    }
-    let widget = build_proctrace(80, 24);
+    let widget = match id.as_str() {
+        "proctrace" => build_proctrace(80, 24),
+        "proctrace_activity" => build_activity(80, 24),
+        _ => return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json()),
+    };
     Ok(widget.to_json())
 }

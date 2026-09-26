@@ -371,15 +371,16 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["servicewatch"]);
+    let ids = serde_json::json!(["servicewatch", "servicewatch_activity"]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
 #[plugin_fn]
 pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
-    if id != "servicewatch" {
-        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
-    }
-    let widget = build_servicewatch(80, 24);
+    let widget = match id.as_str() {
+        "servicewatch" => build_servicewatch(80, 24),
+        "servicewatch_activity" => build_activity(80, 24),
+        _ => return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json()),
+    };
     Ok(widget.to_json())
 }
