@@ -388,7 +388,22 @@
     {
       "id": "cryptopulse_suite",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_suite.wasm",
-      "sha256": "47c6780843b7ddb55fee3163bea710e0e6487f09ed638d3710a997cc34e28c9d"
+      "sha256": "47c6780843b7ddb55fee3163bea710e0e6487f09ed638d3710a997cc34e28c9d",
+      "name": "CryptoPulse Suite",
+      "description": "Core widgets for the CryptoPulse workspace.",
+      "version": "0.1.0",
+      "api_version": "0.10.0",
+      "author": "zius",
+      "type": "component",
+      "components": [
+        "cryptopulse_overview",
+        "cryptopulse_movers",
+        "cryptopulse_mood",
+        "cryptopulse_watchlist",
+        "cryptopulse_stats",
+        "cryptopulse_heatmap"
+      ],
+      "layout": []
     },
     {
       "id": "video_player",
