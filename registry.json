@@ -437,8 +437,8 @@
       "version": "1.0.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_github.wasm",
+      "sha256": "16773c5007fe8fe3821c679c5d000d56c72d0ecf49312436f739e92778b6a660",
       "type": "component"
     },
     {
@@ -448,8 +448,8 @@
       "version": "1.0.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_thermals.wasm",
+      "sha256": "5ad59d8210fe426686b357d6d49d926a95d9b721759e7c5dc2c6959db3810bcc",
       "type": "component"
     },
     {
@@ -459,8 +459,8 @@
       "version": "1.0.0",
       "api_version": "0.10.0",
       "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_world_clocks.wasm",
+      "sha256": "21dd6b853ed59f0ed30e235504e47e2cff4f23b51325246eeb7648c7363d33d3",
       "type": "component"
     }
   ]

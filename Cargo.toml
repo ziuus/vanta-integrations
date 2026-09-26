@@ -2,7 +2,6 @@
 members = [
     "components/*",
     "pages/*",
-    "scenes/*",
     "themes/*",
     "sdk"
 ]
