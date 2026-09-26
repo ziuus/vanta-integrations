@@ -1,445 +1,445 @@
 {
-  "api_version": "0.10.0",
-  "extensions": [
-    {
-      "id": "page_filespace",
-      "name": "FileSpace Workspace",
-      "description": "Complete terminal-native file management workspace. Includes navigation tree, quick bookmarks sidebar, metadata & syntax file preview, path navigator, and async operations queue.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
-      "type": "page",
-      "components": [
-        "filespace_browser",
-        "filespace_preview",
-        "filespace_sidebar",
-        "filespace_queue",
-        "filespace_path"
-      ],
-      "layout": [
-        [
-          "filespace_sidebar",
-          "filespace_queue"
-        ],
-        [
-          "filespace_path",
-          "filespace_browser"
-        ],
-        [
-          "filespace_preview"
-        ]
-      ]
-    },
-    {
-      "id": "page_cryptopulse",
-      "name": "CryptoPulse Terminal",
-      "description": "Live cryptocurrency command center. Includes real-time market overview, top gainers/losers movers, market mood/fear-greed, personal watchlist, global market stats, sector heatmap, and 3D coin visualizer.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
-      "type": "page",
-      "components": [
-        "cryptopulse_overview",
-        "cryptopulse_movers",
-        "cryptopulse_mood",
-        "cryptopulse_watchlist",
-        "cryptopulse_stats",
-        "cryptopulse_heatmap",
-        "crypto_coin"
-      ],
-      "layout": [
-        [
-          "cryptopulse_overview",
-          "crypto_coin"
-        ],
-        [
-          "cryptopulse_movers",
-          "cryptopulse_watchlist"
-        ],
-        [
-          "cryptopulse_mood",
-          "cryptopulse_stats",
-          "cryptopulse_heatmap"
-        ]
-      ]
-    },
-    {
-      "id": "page_mediadeck",
-      "name": "MediaDeck Audio Workstation",
-      "description": "MPRIS audio workstation with real-time waveform spectrum visualizer, player source selector, signal volume level meter, playback transport controls, and album art/track info.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
-      "type": "page",
-      "components": [
-        "mediadeck_now_playing",
-        "mediadeck_visualizer",
-        "mediadeck_players",
-        "mediadeck_signal",
-        "mediadeck_transport"
-      ],
-      "layout": [
-        [
-          "mediadeck_now_playing",
-          "mediadeck_transport"
-        ],
-        [
-          "mediadeck_visualizer",
-          "mediadeck_signal"
-        ],
-        [
-          "mediadeck_players"
-        ]
-      ]
-    },
-    {
-      "id": "page_observability",
-      "name": "System Sentry & Deep Observability",
-      "description": "Deep kernel & process observability suite. Includes Sentinel security anomaly detector, IOWatch disk attribution, NetScope socket tracking, PortWatch listening ports, ProcTrace ancestry tree, and ServiceWatch systemd monitor.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "",
-      "sha256": "",
-      "type": "page",
-      "components": [
-        "sentinel",
-        "iowatch_main",
-        "netscope_main",
-        "portwatch_main",
-        "proctrace_main",
-        "servicewatch_main"
-      ],
-      "layout": [
-        [
-          "sentinel",
-          "iowatch_main"
-        ],
-        [
-          "netscope_main",
-          "portwatch_main"
-        ],
-        [
-          "proctrace_main",
-          "servicewatch_main"
-        ]
-      ]
-    },
-    {
-      "id": "sentinel",
-      "name": "Sentinel System Sentry",
-      "description": "Anomaly detection, incident tracking, and health metrics engine.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/sentinel.wasm",
-      "sha256": "116d74e07bdde5942ce2bd7c2a4fb0b2b89d837edeaa48fd4d1a0ff42a7c10b4",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "iowatch_main",
-      "name": "IOWatch",
-      "description": "Process disk I/O monitoring, throughput tracking, top I/O leaderboard, and activity timeline.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_main.wasm",
-      "sha256": "7f404d6b76ad5a6474614ef45af06a61f615a90ca4c22293464713f0796dbfce",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "netscope_main",
-      "name": "NetScope",
-      "description": "Live socket network connection tracking, bandwidth monitor, connection table, and activity stream.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_main.wasm",
-      "sha256": "4216790aa70b62b88a23026b219274739fd8d4ac2b7ae8065d545b5b5cd593f3",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "portwatch_main",
-      "name": "PortWatch",
-      "description": "Active listening port monitor, socket ownership inspector, and port lifecycle events.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_main.wasm",
-      "sha256": "b5f5cec465ec531fe58f164434e6279ab7d08196fdf7310c4620b0283b360bea",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "proctrace_main",
-      "name": "ProcTrace",
-      "description": "Process ancestry hierarchy tree, lifecycle tracker, and fork/exec activity timeline.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_main.wasm",
-      "sha256": "c90ecacd59212684072e049fea9aae8e929277005262d9551ea5b42062719a57",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "servicewatch_main",
-      "name": "ServiceWatch",
-      "description": "Systemd service status, state transitions, units inspector, and failure history.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_main.wasm",
-      "sha256": "53c8f974e8a352c149a7cabc461ade5ff87c68ca88b3e675ab2c5b83f1920825",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "crypto_coin",
-      "name": "Crypto 3D Coin",
-      "description": "3D rotating ASCII coin visualizer for crypto assets.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
-      "sha256": "f346c29e5c6476d78050db46ba5ed0a8585b757c093cbbdc52fe3629c46faaa6",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "filespace_browser",
-      "name": "FileSpace Browser",
-      "description": "Terminal file manager file tree and directory navigation pane.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_browser.wasm",
-      "sha256": "bb290b701bd05acf2cacb67d61dfd6c11039ad2e84d93d4e4034a9d7e7b1a1cf",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "filespace_preview",
-      "name": "FileSpace Preview",
-      "description": "File preview pane with syntax inspection and metadata.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_preview.wasm",
-      "sha256": "e23186bacffdd54dec60544978445972a9653cc9e398840f3447f315f3226059",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "filespace_sidebar",
-      "name": "FileSpace Sidebar",
-      "description": "File system bookmarks, drive mounts, and directory quick-links.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_sidebar.wasm",
-      "sha256": "a9ed4053c8cc84bb0829ef47fcfdd75175692445432bb6a8afd92e876ecee27e",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "filespace_queue",
-      "name": "FileSpace Queue",
-      "description": "Asynchronous file copy, move, and delete operation queue.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_queue.wasm",
-      "sha256": "27ae96cbf4caad20dc7802ee2b6a29e9dcc54d625d14835034454cb8c9fd4e8d",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "filespace_path",
-      "name": "FileSpace Path",
-      "description": "Breadcrumb path navigator with active working directory status.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_path.wasm",
-      "sha256": "d5d187a12d957a06ab93046f925e0208e21d584d31e8c940aff14e8334963b5f",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "mediadeck_now_playing",
-      "name": "MediaDeck Now Playing",
-      "description": "Active audio track, album art display, and artist metadata.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_now_playing.wasm",
-      "sha256": "57dea2f68e6e7fb64ae0b189fe4d76188416695f3320f6a4dc6274b4327e822c",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "mediadeck_visualizer",
-      "name": "MediaDeck Visualizer",
-      "description": "Real-time terminal audio spectrum and waveform visualizer.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_visualizer.wasm",
-      "sha256": "a54bd0e280bcaf7400d541055b8d79cef93c099c0d4b6e61d5bd21e82615402a",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "mediadeck_players",
-      "name": "MediaDeck Players",
-      "description": "Active MPRIS audio/video players and source selector.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_players.wasm",
-      "sha256": "ff6d6e5d5ac4304f2912ab9c08c3e7fb759f82affaf51827b7a742a66fca281b",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "mediadeck_signal",
-      "name": "MediaDeck Signal",
-      "description": "Audio signal pipeline and device output level meter.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_signal.wasm",
-      "sha256": "75a85b39c73b80b5fc085f987aa34e7db2ffd7cb754760399c0fcd0b59bd53de",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "mediadeck_transport",
-      "name": "MediaDeck Transport",
-      "description": "Playback transport controls (play, pause, next, seek bar).",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
-      "sha256": "56565cff947759da4c1a7c703417cdee521b136131847510afd92e3917fa02d9",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "dashboard_github",
-      "name": "GitHub Contributions",
-      "description": "Your GitHub green squares grid.",
-      "version": "1.0.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_github.wasm",
-      "sha256": "16773c5007fe8fe3821c679c5d000d56c72d0ecf49312436f739e92778b6a660",
-      "type": "component"
-    },
-    {
-      "id": "dashboard_thermals",
-      "name": "Radial Thermals",
-      "description": "Temperature gauges for CPU and GPU.",
-      "version": "1.0.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_thermals.wasm",
-      "sha256": "5ad59d8210fe426686b357d6d49d926a95d9b721759e7c5dc2c6959db3810bcc",
-      "type": "component"
-    },
-    {
-      "id": "dashboard_world_clocks",
-      "name": "World Clocks",
-      "description": "A strip showing the local time in multiple time zones.",
-      "version": "1.0.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_world_clocks.wasm",
-      "sha256": "dc200d5fe5809d0ee1c60e3fe1a7dce1f5b6ae58c7367db89efef2b0e2fd3bbf",
-      "type": "component"
-    },
-    {
-      "id": "cryptopulse_suite",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_suite.wasm",
-      "sha256": "47c6780843b7ddb55fee3163bea710e0e6487f09ed638d3710a997cc34e28c9d",
-      "name": "CryptoPulse Suite",
-      "description": "Core widgets for the CryptoPulse workspace.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "type": "component",
-      "components": [
-        "cryptopulse_overview",
-        "cryptopulse_movers",
-        "cryptopulse_mood",
-        "cryptopulse_watchlist",
-        "cryptopulse_stats",
-        "cryptopulse_heatmap"
-      ],
-      "layout": []
-    },
-    {
-      "id": "video_player",
-      "name": "Video Player",
-      "description": "Plays animated GIFs directly in the terminal using braille conversion.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/video_player.wasm",
-      "sha256": "72502daeef7d1f68abf6bc77bbc937077818af4e3481c7c0c88054e802dbe13c",
-      "type": "component",
-      "components": [
-        "video_widget"
-      ],
-      "layout": []
-    },
-    {
-      "id": "page_rosary",
-      "name": "Holy Rosary Workspace",
-      "description": "Interactive Holy Rosary workspace. Features bead counter, daily mystery selector (Joyful, Sorrowful, Glorious, Luminous), English/Malayalam prayer translation, and ASCII holy art.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/page_rosary.wasm",
-      "sha256": "0d923c3580a0907de6b9e68048d390d52b5d9539a6cdca45d32df9baa41c5907",
-      "type": "component",
-      "components": [],
-      "layout": [
-        [
-          "rosary_art",
-          "rosary_counter"
-        ],
-        [
-          "rosary_prayer"
-        ]
-      ]
-    }
-  ]
+    "api_version": "0.10.0",
+    "extensions": [
+        {
+            "id": "page_filespace",
+            "name": "FileSpace Workspace",
+            "description": "Complete terminal-native file management workspace. Includes navigation tree, quick bookmarks sidebar, metadata & syntax file preview, path navigator, and async operations queue.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "",
+            "sha256": "",
+            "type": "page",
+            "components": [
+                "filespace_browser",
+                "filespace_preview",
+                "filespace_sidebar",
+                "filespace_queue",
+                "filespace_path"
+            ],
+            "layout": [
+                [
+                    "filespace_sidebar",
+                    "filespace_queue"
+                ],
+                [
+                    "filespace_path",
+                    "filespace_browser"
+                ],
+                [
+                    "filespace_preview"
+                ]
+            ]
+        },
+        {
+            "id": "page_cryptopulse",
+            "name": "CryptoPulse Terminal",
+            "description": "Live cryptocurrency command center. Includes real-time market overview, top gainers/losers movers, market mood/fear-greed, personal watchlist, global market stats, sector heatmap, and 3D coin visualizer.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "",
+            "sha256": "",
+            "type": "page",
+            "components": [
+                "cryptopulse_overview",
+                "cryptopulse_movers",
+                "cryptopulse_mood",
+                "cryptopulse_watchlist",
+                "cryptopulse_stats",
+                "cryptopulse_heatmap",
+                "crypto_coin"
+            ],
+            "layout": [
+                [
+                    "cryptopulse_overview",
+                    "crypto_coin"
+                ],
+                [
+                    "cryptopulse_movers",
+                    "cryptopulse_watchlist"
+                ],
+                [
+                    "cryptopulse_mood",
+                    "cryptopulse_stats",
+                    "cryptopulse_heatmap"
+                ]
+            ]
+        },
+        {
+            "id": "page_mediadeck",
+            "name": "MediaDeck Audio Workstation",
+            "description": "MPRIS audio workstation with real-time waveform spectrum visualizer, player source selector, signal volume level meter, playback transport controls, and album art/track info.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "",
+            "sha256": "",
+            "type": "page",
+            "components": [
+                "mediadeck_now_playing",
+                "mediadeck_visualizer",
+                "mediadeck_players",
+                "mediadeck_signal",
+                "mediadeck_transport"
+            ],
+            "layout": [
+                [
+                    "mediadeck_now_playing",
+                    "mediadeck_transport"
+                ],
+                [
+                    "mediadeck_visualizer",
+                    "mediadeck_signal"
+                ],
+                [
+                    "mediadeck_players"
+                ]
+            ]
+        },
+        {
+            "id": "page_observability",
+            "name": "System Sentry & Deep Observability",
+            "description": "Deep kernel & process observability suite. Includes Sentinel security anomaly detector, IOWatch disk attribution, NetScope socket tracking, PortWatch listening ports, ProcTrace ancestry tree, and ServiceWatch systemd monitor.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "",
+            "sha256": "",
+            "type": "page",
+            "components": [
+                "sentinel",
+                "iowatch_main",
+                "netscope_main",
+                "portwatch_main",
+                "proctrace_main",
+                "servicewatch_main"
+            ],
+            "layout": [
+                [
+                    "sentinel",
+                    "iowatch_main"
+                ],
+                [
+                    "netscope_main",
+                    "portwatch_main"
+                ],
+                [
+                    "proctrace_main",
+                    "servicewatch_main"
+                ]
+            ]
+        },
+        {
+            "id": "sentinel",
+            "name": "Sentinel System Sentry",
+            "description": "Anomaly detection, incident tracking, and health metrics engine.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/sentinel.wasm",
+            "sha256": "116d74e07bdde5942ce2bd7c2a4fb0b2b89d837edeaa48fd4d1a0ff42a7c10b4",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "iowatch_main",
+            "name": "IOWatch",
+            "description": "Process disk I/O monitoring, throughput tracking, top I/O leaderboard, and activity timeline.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/iowatch_main.wasm",
+            "sha256": "7f404d6b76ad5a6474614ef45af06a61f615a90ca4c22293464713f0796dbfce",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "netscope_main",
+            "name": "NetScope",
+            "description": "Live socket network connection tracking, bandwidth monitor, connection table, and activity stream.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/netscope_main.wasm",
+            "sha256": "4216790aa70b62b88a23026b219274739fd8d4ac2b7ae8065d545b5b5cd593f3",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "portwatch_main",
+            "name": "PortWatch",
+            "description": "Active listening port monitor, socket ownership inspector, and port lifecycle events.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_main.wasm",
+            "sha256": "b5f5cec465ec531fe58f164434e6279ab7d08196fdf7310c4620b0283b360bea",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "proctrace_main",
+            "name": "ProcTrace",
+            "description": "Process ancestry hierarchy tree, lifecycle tracker, and fork/exec activity timeline.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/proctrace_main.wasm",
+            "sha256": "c90ecacd59212684072e049fea9aae8e929277005262d9551ea5b42062719a57",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "servicewatch_main",
+            "name": "ServiceWatch",
+            "description": "Systemd service status, state transitions, units inspector, and failure history.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/servicewatch_main.wasm",
+            "sha256": "53c8f974e8a352c149a7cabc461ade5ff87c68ca88b3e675ab2c5b83f1920825",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "crypto_coin",
+            "name": "Crypto 3D Coin",
+            "description": "3D rotating ASCII coin visualizer for crypto assets.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/crypto_coin.wasm",
+            "sha256": "f346c29e5c6476d78050db46ba5ed0a8585b757c093cbbdc52fe3629c46faaa6",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "filespace_browser",
+            "name": "FileSpace Browser",
+            "description": "Terminal file manager file tree and directory navigation pane.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_browser.wasm",
+            "sha256": "bb290b701bd05acf2cacb67d61dfd6c11039ad2e84d93d4e4034a9d7e7b1a1cf",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "filespace_preview",
+            "name": "FileSpace Preview",
+            "description": "File preview pane with syntax inspection and metadata.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_preview.wasm",
+            "sha256": "e23186bacffdd54dec60544978445972a9653cc9e398840f3447f315f3226059",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "filespace_sidebar",
+            "name": "FileSpace Sidebar",
+            "description": "File system bookmarks, drive mounts, and directory quick-links.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_sidebar.wasm",
+            "sha256": "a9ed4053c8cc84bb0829ef47fcfdd75175692445432bb6a8afd92e876ecee27e",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "filespace_queue",
+            "name": "FileSpace Queue",
+            "description": "Asynchronous file copy, move, and delete operation queue.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_queue.wasm",
+            "sha256": "27ae96cbf4caad20dc7802ee2b6a29e9dcc54d625d14835034454cb8c9fd4e8d",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "filespace_path",
+            "name": "FileSpace Path",
+            "description": "Breadcrumb path navigator with active working directory status.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/filespace_path.wasm",
+            "sha256": "d5d187a12d957a06ab93046f925e0208e21d584d31e8c940aff14e8334963b5f",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "mediadeck_now_playing",
+            "name": "MediaDeck Now Playing",
+            "description": "Active audio track, album art display, and artist metadata.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_now_playing.wasm",
+            "sha256": "57dea2f68e6e7fb64ae0b189fe4d76188416695f3320f6a4dc6274b4327e822c",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "mediadeck_visualizer",
+            "name": "MediaDeck Visualizer",
+            "description": "Real-time terminal audio spectrum and waveform visualizer.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_visualizer.wasm",
+            "sha256": "a54bd0e280bcaf7400d541055b8d79cef93c099c0d4b6e61d5bd21e82615402a",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "mediadeck_players",
+            "name": "MediaDeck Players",
+            "description": "Active MPRIS audio/video players and source selector.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_players.wasm",
+            "sha256": "ff6d6e5d5ac4304f2912ab9c08c3e7fb759f82affaf51827b7a742a66fca281b",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "mediadeck_signal",
+            "name": "MediaDeck Signal",
+            "description": "Audio signal pipeline and device output level meter.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_signal.wasm",
+            "sha256": "75a85b39c73b80b5fc085f987aa34e7db2ffd7cb754760399c0fcd0b59bd53de",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "mediadeck_transport",
+            "name": "MediaDeck Transport",
+            "description": "Playback transport controls (play, pause, next, seek bar).",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
+            "sha256": "56565cff947759da4c1a7c703417cdee521b136131847510afd92e3917fa02d9",
+            "type": "component",
+            "components": [],
+            "layout": []
+        },
+        {
+            "id": "dashboard_github",
+            "name": "GitHub Contributions",
+            "description": "Your GitHub green squares grid.",
+            "version": "1.0.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_github.wasm",
+            "sha256": "16773c5007fe8fe3821c679c5d000d56c72d0ecf49312436f739e92778b6a660",
+            "type": "component"
+        },
+        {
+            "id": "dashboard_thermals",
+            "name": "Radial Thermals",
+            "description": "Temperature gauges for CPU and GPU.",
+            "version": "1.0.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_thermals.wasm",
+            "sha256": "5ad59d8210fe426686b357d6d49d926a95d9b721759e7c5dc2c6959db3810bcc",
+            "type": "component"
+        },
+        {
+            "id": "dashboard_world_clocks",
+            "name": "World Clocks",
+            "description": "A strip showing the local time in multiple time zones.",
+            "version": "1.0.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_world_clocks.wasm",
+            "sha256": "dc200d5fe5809d0ee1c60e3fe1a7dce1f5b6ae58c7367db89efef2b0e2fd3bbf",
+            "type": "component"
+        },
+        {
+            "id": "cryptopulse_suite",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_suite.wasm",
+            "sha256": "47c6780843b7ddb55fee3163bea710e0e6487f09ed638d3710a997cc34e28c9d",
+            "name": "CryptoPulse Suite",
+            "description": "Core widgets for the CryptoPulse workspace.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "type": "component",
+            "components": [
+                "cryptopulse_overview",
+                "cryptopulse_movers",
+                "cryptopulse_mood",
+                "cryptopulse_watchlist",
+                "cryptopulse_stats",
+                "cryptopulse_heatmap"
+            ],
+            "layout": []
+        },
+        {
+            "id": "video_player",
+            "name": "Video Player",
+            "description": "Plays animated GIFs directly in the terminal using braille conversion.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/video_player.wasm",
+            "sha256": "72502daeef7d1f68abf6bc77bbc937077818af4e3481c7c0c88054e802dbe13c",
+            "type": "component",
+            "components": [
+                "video_widget"
+            ],
+            "layout": []
+        },
+        {
+            "id": "page_rosary",
+            "name": "Holy Rosary Workspace",
+            "description": "Interactive Holy Rosary workspace. Features bead counter, daily mystery selector (Joyful, Sorrowful, Glorious, Luminous), English/Malayalam prayer translation, and ASCII holy art.",
+            "version": "0.1.0",
+            "api_version": "0.10.0",
+            "author": "zius",
+            "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/page_rosary.wasm",
+            "sha256": "576c782727bfb7345348d9b0278cbd1ae782229121229302805c6a7688c2078e",
+            "type": "component",
+            "components": [],
+            "layout": [
+                [
+                    "rosary_art",
+                    "rosary_counter"
+                ],
+                [
+                    "rosary_prayer"
+                ]
+            ]
+        }
+    ]
 }
