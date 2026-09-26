@@ -184,19 +184,6 @@
       "layout": []
     },
     {
-      "id": "portwatch_listeners",
-      "name": "PortWatch Listeners",
-      "description": "Listening TCP/UDP ports mapped to owning processes.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/portwatch_listeners.wasm",
-      "sha256": "2134c15774b231ceea4c90e9c5342f0164507da561fa71b7ea70d348b41a821d",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
       "id": "proctrace_main",
       "name": "ProcTrace",
       "description": "Process ancestry hierarchy tree, lifecycle tracker, and fork/exec activity timeline.",
@@ -439,19 +426,6 @@
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_transport.wasm",
       "sha256": "56565cff947759da4c1a7c703417cdee521b136131847510afd92e3917fa02d9",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "security",
-      "name": "Vanta Security",
-      "description": "Live CVE security advisory feed and system vulnerability monitor.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/security.wasm",
-      "sha256": "c0d8d37b9705c8708e14962705ad24186713908aa94b71378556e59de5ce2b92",
       "type": "component",
       "components": [],
       "layout": []
