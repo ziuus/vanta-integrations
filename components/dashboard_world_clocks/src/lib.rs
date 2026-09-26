@@ -56,19 +56,19 @@ pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
             _ => ("🌙", Color::Rgb(100, 149, 237)),
         };
 
-        spans.push(Span::styled(format!(" {} ", icon), Style::default().fg(color)));
-        spans.push(Span::styled(format!("{} ", code), Style::default().fg(Color::Gray)));
-        spans.push(Span::styled(
+        spans.push(ui::span(format!(" {} ", icon), Style::fg(color)));
+        spans.push(ui::span(format!("{} ", code), Style::fg(Color::GRAY)));
+        spans.push(ui::span(
             local_time.format("%H:%M").to_string(),
-            Style::default().fg(Color::White).bold(),
+            Style::fg(Color::WHITE).bold(),
         ));
 
         if i < zones.len() - 1 {
-            spans.push(Span::styled("  │", Style::default().fg(Color::DarkGray)));
+            spans.push(ui::span("  │", Style::fg(Color::DARK_GRAY)));
         }
     }
 
-    let widget = Widget::paragraph(vec![Line::from(spans)]).block(
+    let widget = Widget::paragraph(vec![Line::new(spans)]).block(
         Block::titled(" 🌍 Global Pulse ".to_string())
     );
 
