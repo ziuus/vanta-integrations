@@ -429,12 +429,8 @@
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/page_rosary.wasm",
       "sha256": "0d923c3580a0907de6b9e68048d390d52b5d9539a6cdca45d32df9baa41c5907",
-      "type": "page",
-      "components": [
-        "rosary_art",
-        "rosary_counter",
-        "rosary_prayer"
-      ],
+      "type": "component",
+      "components": [],
       "layout": [
         [
           "rosary_art",
