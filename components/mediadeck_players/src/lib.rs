@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use extism_pdk::*;
 use serde::{Deserialize, Serialize};
 use vanta_ext_sdk::{

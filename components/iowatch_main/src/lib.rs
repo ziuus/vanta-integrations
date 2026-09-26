@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports)]
 //! IOWatch — per-process I/O throughput with temporal history.
 //!
 //! Native Vanta shows aggregate disk stats. IOWatch answers the different
@@ -30,10 +31,10 @@ use std::cell::RefCell;
 use vanta_ext_sdk::history::now_ms;
 use vanta_ext_sdk::telemetry::{self, IoSnapshot};
 use vanta_ext_sdk::ui::{self, Block, Color, Line, Style, Table, Widget};
-use vanta_ext_sdk::{ExtensionMetadata, API_VERSION_TELEMETRY};
 
-const ID: &str = "iowatch";
-const VERSION: &str = "0.1.0";
+
+
+
 
 /// How many processes to request from the host (ranked by total_bps desc).
 const FETCH_LIMIT: usize = 15;

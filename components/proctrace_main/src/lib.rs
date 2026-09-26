@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports)]
 use extism_pdk::*;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};

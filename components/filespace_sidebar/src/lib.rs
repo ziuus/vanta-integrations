@@ -27,12 +27,14 @@ pub fn render_widget(widget_id: String) -> FnResult<Vec<u8>> {
     if widget_id != "filespace_sidebar" {
         return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
     }
+#[allow(clippy::vec_init_then_push)]
 
-    let mut lines = vec![];
-    lines.push(Line::new(vec![Span {
+    let mut lines = vec![
+    Line::new(vec![Span {
         content: " NAVIGATION".to_string(),
         style: Some(Style::dim().bold()),
-    }]));
+    }]),
+];
     lines.push(Line::new(vec![Span {
         content: " 🏠 Home".to_string(),
         style: Some(Style::fg(Color::WHITE)),

@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports)]
 //! PortWatch — what network ports is this machine exposing, and which process
 //! owns them?
 //!

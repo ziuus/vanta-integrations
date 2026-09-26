@@ -1,8 +1,9 @@
+#![allow(dead_code)]
 use extism_pdk::*;
 use serde::{Deserialize, Serialize};
 use vanta_ext_sdk::{
     telemetry::query,
-    ui::{unavailable, Block, Color, Line, Span, Style, Widget},
+    ui::{unavailable, Block,  Line, Span,  Widget},
     API_VERSION_TELEMETRY,
 };
 

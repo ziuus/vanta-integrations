@@ -67,17 +67,17 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
     let rot_y = t;
     let rot_z = 0.08f32;
 
-    let (sinX, cosX) = rot_x.sin_cos();
-    let (sinY, cosY) = rot_y.sin_cos();
-    let (sinZ, cosZ) = rot_z.sin_cos();
+    let (sin_x, cos_x) = rot_x.sin_cos();
+    let (sin_y, cos_y) = rot_y.sin_cos();
+    let (sin_z, cos_z) = rot_z.sin_cos();
 
     let rotate = |x: f32, y: f32, z: f32| -> (f32, f32, f32) {
-        let y1 = y * cosX - z * sinX;
-        let z1 = y * sinX + z * cosX;
-        let x2 = x * cosY + z1 * sinY;
-        let z2 = -x * sinY + z1 * cosY;
-        let x3 = x2 * cosZ - y1 * sinZ;
-        let y3 = x2 * sinZ + y1 * cosZ;
+        let y1 = y * cos_x - z * sin_x;
+        let z1 = y * sin_x + z * cos_x;
+        let x2 = x * cos_y + z1 * sin_y;
+        let z2 = -x * sin_y + z1 * cos_y;
+        let x3 = x2 * cos_z - y1 * sin_z;
+        let y3 = x2 * sin_z + y1 * cos_z;
         (x3, y3, z2)
     };
 
@@ -102,9 +102,9 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
             let norm_r = r / r_coin;
             for a_step in 0..120 {
                 let theta = (a_step as f32 / 120.0) * std::f32::consts::TAU;
-                let (sinT, cosT) = theta.sin_cos();
-                let ox = r * cosT;
-                let oy = r * sinT;
+                let (sin_t, cos_t) = theta.sin_cos();
+                let ox = r * cos_t;
+                let oy = r * sin_t;
 
                 let (is_emblem, is_border) = if face_sign > 0.0 {
                     emblem_map(ox / r_coin, oy / r_coin)
@@ -121,8 +121,8 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
 
                 if is_emblem {
                     nz *= 0.85;
-                    nx += 0.3 * cosT;
-                    ny += 0.3 * sinT;
+                    nx += 0.3 * cos_t;
+                    ny += 0.3 * sin_t;
                     bump = 0.35;
                 } else if is_border {
                     bump = 0.25;
@@ -179,13 +179,13 @@ fn render_3d_coin(tick: u64, width: usize, height: usize) -> Vec<serde_json::Val
         let z_coord = -half_t + (z_s as f32 / 6.0) * (2.0 * half_t);
         for a_s in 0..140 {
             let theta = (a_s as f32 / 140.0) * std::f32::consts::TAU;
-            let (sinT, cosT) = theta.sin_cos();
+            let (sin_t, cos_t) = theta.sin_cos();
             let reeding = (theta * 36.0).cos();
-            let nx = cosT + 0.15 * reeding * cosT;
-            let ny = sinT + 0.15 * reeding * sinT;
+            let nx = cos_t + 0.15 * reeding * cos_t;
+            let ny = sin_t + 0.15 * reeding * sin_t;
             let n_len = (nx * nx + ny * ny).sqrt().max(0.001);
 
-            let (rx, ry, rz) = rotate(r_coin * cosT, r_coin * sinT, z_coord);
+            let (rx, ry, rz) = rotate(r_coin * cos_t, r_coin * sin_t, z_coord);
             let (rnx, rny, rnz) = rotate(nx / n_len, ny / n_len, 0.0);
 
             let z_depth = k2 + rz;

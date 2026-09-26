@@ -1,3 +1,4 @@
+#![allow(dead_code, clippy::redundant_pattern_matching)]
 use extism_pdk::*;
 use serde::{Deserialize, Serialize};
 use vanta_ext_sdk::{
