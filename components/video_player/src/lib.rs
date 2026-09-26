@@ -1,26 +1,27 @@
 use extism_pdk::*;
 use vanta_ext_sdk::{ui, Widget};
-use vanta_ext_sdk::{
-    style::{Color, Style},
-    Line, Span,
-    Block,
-};
+use vanta_ext_sdk::ui::{Color, Style, Line, Span, Block};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-use image::{AnimationDecoder, GenericImageView};
+use image::AnimationDecoder;
 use std::cell::RefCell;
 
+#[host_fn]
+extern "ExtismHost" {
+    fn vanta_query(input: String) -> String;
+}
 
 thread_local! {
     static FRAMES: RefCell<Vec<image::RgbaImage>> = RefCell::new(Vec::new());
+    static GIF_BYTES: RefCell<Option<Vec<u8>>> = RefCell::new(None);
     static LAST_TICK: RefCell<f64> = RefCell::new(0.0);
+    static ERROR_MSG: RefCell<String> = RefCell::new(String::new());
 }
 
-// Braille mapping based on braille_image.rs
 const DOT_BITS: [[u8; 2]; 4] = [[0, 3], [1, 4], [2, 5], [6, 7]];
 
-fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line<'static>> {
+fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line> {
     if w == 0 || h == 0 { return Vec::new(); }
-    let (iw, ih) = img.dimensions();
+    let (iw, ih) = (img.width(), img.height());
     if iw == 0 || ih == 0 { return Vec::new(); }
     
     let aspect = iw as f32 / ih as f32;
@@ -36,13 +37,11 @@ fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line<'static>> {
     let px_w = cw as u32 * 2;
     let px_h = ch as u32 * 4;
     
-    // In a WASM plugin, resize_exact is expensive on every frame. 
-    // Ideally we would resize the frames ahead of time, but w/h can change.
     let small = image::imageops::resize(img, px_w, px_h, image::imageops::FilterType::Nearest);
     
     let mut lines = Vec::with_capacity(ch as usize);
     for cy in 0..ch as u32 {
-        let mut spans: Vec<Span<'static>> = Vec::with_capacity(cw as usize);
+        let mut spans: Vec<Span> = Vec::with_capacity(cw as usize);
         for cx in 0..cw as u32 {
             let mut luma = [0f32; 8];
             let (mut r, mut g, mut b, mut opaque) = (0u32, 0u32, 0u32, 0u32);
@@ -57,7 +56,7 @@ fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line<'static>> {
                 }
             }
             if opaque == 0 {
-                spans.push(Span::raw(" "));
+                spans.push(ui::raw(" "));
                 continue;
             }
             let block_mean: f32 = luma.iter().filter(|l| **l >= 0.0).sum::<f32>() / opaque as f32;
@@ -65,21 +64,21 @@ fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line<'static>> {
             for (dy, row) in DOT_BITS.iter().enumerate() {
                 for (dx, bit) in row.iter().enumerate() {
                     let l = luma[dy * 2 + dx];
-                    if l >= 0.0 && l >= 128.0 { // simplified global threshold
+                    if l >= 0.0 && l >= 128.0 {
                         pattern |= 1 << bit;
                     }
                 }
             }
             if pattern == 0 && block_mean >= 128.0 { pattern = 0xFF; }
             if pattern == 0 {
-                spans.push(Span::raw(" "));
+                spans.push(ui::raw(" "));
                 continue;
             }
             let ch_out = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
             let color = Color::Rgb((r / opaque) as u8, (g / opaque) as u8, (b / opaque) as u8);
-            spans.push(Span::styled(ch_out.to_string(), Style::default().fg(color)));
+            spans.push(ui::span(ch_out.to_string(), Style::fg(color)));
         }
-        lines.push(Line::from(spans));
+        lines.push(Line::new(spans));
     }
     lines
 }
@@ -87,44 +86,77 @@ fn render_image(img: &image::RgbaImage, w: u16, h: u16) -> Vec<Line<'static>> {
 fn build_video_widget(w: u16, h: u16) -> Widget {
     let mut lines = Vec::new();
     
-    // Attempt to load GIF if empty
-    FRAMES.with(|f| {
-        let mut frames = f.borrow_mut();
-        if frames.is_empty() {
-            // Ask host for file bytes
+    GIF_BYTES.with(|gb| {
+        let mut gbytes = gb.borrow_mut();
+        if gbytes.is_none() {
             let req = serde_json::json!({
                 "topic": "fs_read",
                 "path": "/tmp/test.gif"
             });
-            if let Ok(res) = extism_pdk::host::call("vanta_query", req.to_string()) {
-                if let Ok(val) = serde_json::from_slice::<serde_json::Value>(&res) {
-                    if let Some(b64) = val.get("data").and_then(|d| d.get("bytes_b64")).and_then(|b| b.as_str()) {
-                        if let Ok(bytes) = STANDARD.decode(b64) {
-                            if let Ok(decoder) = image::codecs::gif::GifDecoder::new(std::io::Cursor::new(bytes)) {
-                                if let Ok(parsed_frames) = decoder.into_frames().collect_frames() {
-                                    for frame in parsed_frames {
-                                        frames.push(frame.into_buffer());
+            match unsafe { vanta_query(req.to_string()) } {
+                Ok(res) => {
+                    match serde_json::from_str::<serde_json::Value>(&res) {
+                        Ok(val) => {
+                            if let Some(b64) = val.get("data").and_then(|d| d.get("bytes_b64")).and_then(|b| b.as_str()) {
+                                match STANDARD.decode(b64) {
+                                    Ok(bytes) => {
+                                        *gbytes = Some(bytes);
                                     }
+                                    Err(e) => { ERROR_MSG.with(|m| *m.borrow_mut() = format!("b64 err: {}", e)); }
+                                }
+                            } else {
+                                ERROR_MSG.with(|m| *m.borrow_mut() = format!("No bytes_b64"));
+                            }
+                        }
+                        Err(e) => { ERROR_MSG.with(|m| *m.borrow_mut() = format!("json err: {}", e)); }
+                    }
+                }
+                Err(_e) => { ERROR_MSG.with(|m| *m.borrow_mut() = format!("query err")); }
+            }
+        }
+    });
+
+    FRAMES.with(|f| {
+        let mut frames = f.borrow_mut();
+        
+        GIF_BYTES.with(|gb| {
+            if let Some(bytes) = gb.borrow().as_ref() {
+                if frames.is_empty() {
+                    match image::codecs::gif::GifDecoder::new(std::io::Cursor::new(bytes)) {
+                        Ok(decoder) => {
+                            // Extract up to 20 frames to avoid 250ms WASM timeout
+                            for frame_res in decoder.into_frames().take(3) {
+                                match frame_res {
+                                    Ok(frame) => frames.push(frame.into_buffer()),
+                                    Err(_) => break,
                                 }
                             }
                         }
+                        Err(e) => { ERROR_MSG.with(|m| *m.borrow_mut() = format!("gif err: {}", e)); }
                     }
                 }
             }
-        }
-        
+        });
+
+        ERROR_MSG.with(|m| {
+            let msg = m.borrow();
+            if !msg.is_empty() {
+                lines.push(Line::text(msg.clone(), Style::fg(Color::RED)));
+            }
+        });
+
         if frames.is_empty() {
-            lines.push(Line::text("Waiting for /tmp/test.gif...", Style::default()));
+            if lines.is_empty() {
+                lines.push(Line::text("Waiting for /tmp/test.gif...", Style::dim()));
+            }
         } else {
-            // Pick frame based on wall clock. WASM doesn't have Instant::now easily 
-            // without stdweb, but Extism plugins can't use it.
-            // Wait, Extism provides a way to get time, or we can just bump a counter!
             LAST_TICK.with(|t| {
                 let mut tick = t.borrow_mut();
-                *tick += 1.0;
+                *tick += 0.5;
                 let frame_idx = (*tick as usize) % frames.len();
                 let img = &frames[frame_idx];
-                lines = render_image(img, w, h);
+                let mut img_lines = render_image(img, w, h);
+                lines.append(&mut img_lines);
             });
         }
     });
