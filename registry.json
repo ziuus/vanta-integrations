@@ -295,7 +295,7 @@
       "api_version": "0.10.0",
       "author": "zius",
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/mediadeck_now_playing.wasm",
-      "sha256": "8c39ad644cb362586d5fc6f4e2ec78f0ab846374953db9c85a973536f078b35a",
+      "sha256": "57dea2f68e6e7fb64ae0b189fe4d76188416695f3320f6a4dc6274b4327e822c",
       "type": "component",
       "components": [],
       "layout": []
