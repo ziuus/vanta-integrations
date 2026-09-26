@@ -1,0 +1,15 @@
+[package]
+name = "my_vanta_extension"
+version = "0.1.0"
+edition = "2021"
+description = "A custom WASM micro-extension for Vanta"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+extism-pdk = "1.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+vanta-ext-sdk = { git = "https://github.com/ziuus/vanta-integrations.git" }
