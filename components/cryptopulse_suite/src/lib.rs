@@ -326,10 +326,10 @@ fn build_heatmap(_width: u16, height: u16) -> Widget {
 #[plugin_fn]
 pub fn metadata() -> FnResult<Vec<u8>> {
     Ok(vanta_ext_sdk::ExtensionMetadata::new(
-        "cryptopulse_watchlist",
-        "CryptoPulse Watchlist",
-        "0.1.0",
-        "Watchlist component for CryptoPulse.",
+        "cryptopulse_suite",
+        "CryptoPulse Suite",
+        "1.1.0",
+        "Unified crypto market intelligence suite.",
         API_VERSION_TELEMETRY,
     )
     .to_json())
@@ -337,15 +337,27 @@ pub fn metadata() -> FnResult<Vec<u8>> {
 
 #[plugin_fn]
 pub fn widgets(_: ()) -> FnResult<Vec<u8>> {
-    let ids = serde_json::json!(["crypto_watchlist"]);
+    let ids = serde_json::json!([
+        "crypto_overview",
+        "crypto_movers",
+        "crypto_mood",
+        "crypto_watchlist",
+        "crypto_stats",
+        "crypto_heatmap"
+    ]);
     Ok(serde_json::to_vec(&ids).unwrap_or_default())
 }
 
 #[plugin_fn]
 pub fn render_widget(id: String) -> FnResult<Vec<u8>> {
-    if id != "crypto_watchlist" {
-        return Ok(vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget").to_json());
-    }
-    let widget = build_watchlist(80, 20);
+    let widget = match id.as_str() {
+        "crypto_overview" => build_overview(80, 20),
+        "crypto_movers" => build_movers(80, 20),
+        "crypto_mood" => build_mood(80, 20),
+        "crypto_watchlist" => build_watchlist(80, 20),
+        "crypto_stats" => build_stats(80, 20),
+        "crypto_heatmap" => build_heatmap(80, 20),
+        _ => vanta_ext_sdk::ui::unavailable("UNKNOWN", "invalid widget"),
+    };
     Ok(widget.to_json())
 }

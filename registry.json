@@ -223,84 +223,6 @@
       "layout": []
     },
     {
-      "id": "cryptopulse_overview",
-      "name": "CryptoPulse Overview",
-      "description": "Cryptocurrency market metrics, volume, and price board.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_overview.wasm",
-      "sha256": "ff29c53c6c1d8a23134969f53ef5030373b90abfab54d9035112c0e7316b1d45",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "cryptopulse_movers",
-      "name": "CryptoPulse Top Movers",
-      "description": "Top 24h crypto market gainers and losers.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_movers.wasm",
-      "sha256": "9de86863e30e66605bb8a3bc884ea212904f28a5ac340caac031083d89c31f7d",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "cryptopulse_mood",
-      "name": "CryptoPulse Market Mood",
-      "description": "Market sentiment, fear & greed index, and volatility gauge.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_mood.wasm",
-      "sha256": "c3a6508d80c55632ee833c9dbb247258d8b0e727038ecc289bc96398159c51ad",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "cryptopulse_watchlist",
-      "name": "CryptoPulse Watchlist",
-      "description": "Curated crypto asset tracker with live price movements.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_watchlist.wasm",
-      "sha256": "b10954a24660571efc1bf49b762466590a94b10df260399faf1e068bcaec0a85",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "cryptopulse_stats",
-      "name": "CryptoPulse Stats",
-      "description": "Global crypto market capitalization, 24h volume, and BTC dominance.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_stats.wasm",
-      "sha256": "c51f02e558848d8f3046c94fe0d81a350c0235a2c0adbe19abf9f96f203a0e0f",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
-      "id": "cryptopulse_heatmap",
-      "name": "CryptoPulse Heatmap",
-      "description": "Market sector visual performance distribution matrix.",
-      "version": "0.1.0",
-      "api_version": "0.10.0",
-      "author": "zius",
-      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_heatmap.wasm",
-      "sha256": "474e3ce33db015c6c8aa997fcaf2a6fe41241612519c7fffc48b130fcd22f507",
-      "type": "component",
-      "components": [],
-      "layout": []
-    },
-    {
       "id": "filespace_browser",
       "name": "FileSpace Browser",
       "description": "Terminal file manager file tree and directory navigation pane.",
@@ -462,6 +384,11 @@
       "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/dashboard_world_clocks.wasm",
       "sha256": "21dd6b853ed59f0ed30e235504e47e2cff4f23b51325246eeb7648c7363d33d3",
       "type": "component"
+    },
+    {
+      "id": "cryptopulse_suite",
+      "wasm_url": "https://raw.githubusercontent.com/ziuus/vanta-integrations/main/artifacts/cryptopulse_suite.wasm",
+      "sha256": "47c6780843b7ddb55fee3163bea710e0e6487f09ed638d3710a997cc34e28c9d"
     }
   ]
 }
